@@ -1,14 +1,27 @@
-use std::{fs, path::PathBuf};
+use std::{fs::{self, File}, path::PathBuf, process::Command};
+use anyhow::Result;
+use anyhow::Error;
 
-pub fn get_notebooks(notebook_dir: &PathBuf) -> std::io::Result<Vec<String>>{
-    let file_iter = fs::read_dir(notebook_dir)?;
-    let notebooks: Vec<String> = file_iter
+pub fn get_files(dir: &PathBuf) -> Result<Vec<String>>{
+    let file_iter = fs::read_dir(dir)?;
+    let files: Vec<String> = file_iter
         .map(|file| {file.unwrap().file_name().into_string().unwrap()})
         .collect();
-    Ok(notebooks)
+    Ok(files)
 }
 
-pub fn create_notebook(notebook_path: &PathBuf) -> std::io::Result<()>{
-    fs::File::create_new(notebook_path)?;
-    Ok(())
+pub fn create_file(path: &PathBuf) -> Result<File>{
+    File::create_new(path).map_err(Error::from)
+}
+
+pub fn create_dir(path: &PathBuf) -> Result<()>{
+    fs::create_dir_all(path).map_err(Error::from)
+}
+
+pub fn open_file(editor_command: &str, path: &PathBuf) -> Result<()> {
+    Command::new(editor_command)
+        .arg(path.as_os_str())
+        .status()
+        .map(|_|())
+        .map_err(|e|e.into())
 }
