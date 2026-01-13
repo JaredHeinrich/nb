@@ -1,10 +1,9 @@
 use std::fs;
-use std::path::PathBuf;
 
 use anyhow::{Ok, Result};
 use clap::{Arg, ArgMatches, Command};
 
-use crate::error::{CreationError, OpenError};
+use crate::error::{ CreationError, OpenError};
 use crate::{config, file_operations};
 use crate::message::Message;
 
@@ -17,75 +16,82 @@ impl App{
         App { config }
     }
 
-    pub fn create_todo_list_dir(&self) -> Result<()> {
-        if fs::exists(&self.config.todo_list_dir)? == false {
-            file_operations::create_dir(&self.config.todo_list_dir)?;
+    fn check_state(&self) -> Result<()> {
+        // ensure existence of nb_dir
+        if fs::exists(&self.config.nb_dir)? == false {
+            file_operations::create_dir(&self.config.nb_dir)?;
+        }
+        // ensure existence of default_file
+        let mut default_nb_path = self.config.nb_dir.clone();
+        default_nb_path.push(&self.config.default_file);
+        if fs::exists(&default_nb_path)? == false {
+            file_operations::create_file(&default_nb_path)?;
         }
         Ok(())
     }
 
-    fn create_todo_list(&self, name: &str) -> Result<Message> {
-        let mut todo_list_path: PathBuf = self.config.todo_list_dir.to_owned();
-        todo_list_path.push(&name);
-        if fs::exists(&todo_list_path)? {
-            Err(CreationError::TodoListAlreadyExists)?;
+    fn create_note_book(&self, name: &str) -> Result<Message> {
+        let mut nb_path = self.config.nb_dir.clone();
+        nb_path.push(&name);
+        if fs::exists(&nb_path)? {
+            Err(CreationError::AlreadyExists)?;
         }
-        file_operations::create_file(&todo_list_path)?;
-        Ok(Message::CreatedTodoList)
+        file_operations::create_file(&nb_path)?;
+        Ok(Message::CreatedNoteBook)
     }
 
-    fn list_todo_lists(&self) -> Result<Message> {
-        let todo_list_dir = &self.config.todo_list_dir;
-        let files = file_operations::get_files(todo_list_dir)?;
-        Ok(Message::ListOfTodoLists(files))
+    fn list_note_books(&self) -> Result<Message> {
+        let nb_dir = &self.config.nb_dir;
+        let files = file_operations::get_files(nb_dir)?;
+        Ok(Message::ListOfNoteBooks(files))
     }
 
-    fn open_todo_list(&self, name: &str) -> Result<Message> {
-        let mut todo_list_path: PathBuf = self.config.todo_list_dir.to_owned();
-        todo_list_path.push(&name);
-        if !fs::exists(&todo_list_path)? {
-            Err(OpenError::TodoListNotFound)?;
+    fn open_note_book(&self, name: &str) -> Result<Message> {
+        let mut note_book_path = self.config.nb_dir.to_owned();
+        note_book_path.push(&name);
+        if !fs::exists(&note_book_path)? {
+            Err(OpenError::NotFound)?;
         }
-        file_operations::open_file(&self.config.editor, &todo_list_path)?;
+        file_operations::open_file(&self.config.editor, &note_book_path)?;
         Ok(Message::EmptyMessage)
     }
 
 
     pub fn handle_command(&self, matches: ArgMatches) -> Result<Message> {
-        self.create_todo_list_dir()?;
+        self.check_state()?;
 
         match matches.subcommand() {
-            Some(("list", _sub_matches)) => self.list_todo_lists(),
+            Some(("list", _sub_matches)) => self.list_note_books(),
             Some(("new", sub_matches)) => {
-                let name = sub_matches.get_one::<String>("file_name").unwrap();
-                self.create_todo_list(name)
+                let name = sub_matches.get_one::<String>("name").unwrap();
+                self.create_note_book(name)
             },
             _ => {
-                let name = matches.get_one::<String>("file_name").unwrap();
-                self.open_todo_list(name)
+                let name = matches.get_one::<String>("name").unwrap();
+                self.open_note_book(name)
             }
         }
     }
 
     pub fn get_command(&self) -> Command {
-        Command::new("todo")
-            .version("1.0.0")
-            .about("CLI todo list manager")
-            .arg(Arg::new("file_name")
-                .value_name("FILE_NAME")
-                .help("Name of the todo list to open")
-                .default_value(self.config.main_file.clone())
+        Command::new("nb")
+            .version("0.1.0")
+            .about("CLI note book manager")
+            .arg(Arg::new("name")
+                .value_name("NAME")
+                .help("Name of the note book to open")
+                .default_value(self.config.default_file.clone())
             )
             .subcommand(Command::new("new")
-                .about("Create a new todo list")
-                .arg(Arg::new("file_name")
-                    .value_name("FILE_NAME")
-                    .help("Name of the todo list that should be created.")
+                .about("Create a new note book")
+                .arg(Arg::new("name")
+                    .value_name("NAME")
+                    .help("Name of the note book that should be created.")
                     .required(true)
                 )
             )
             .subcommand(Command::new("list")
-                .about("List existing todo lists")
+                .about("List existing note books")
             )
     }
 }

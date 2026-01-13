@@ -4,24 +4,24 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum CreationError {
-    TodoListAlreadyExists
+    AlreadyExists,
 }
 impl Display for CreationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::TodoListAlreadyExists => writeln!(f, "The Todo List already exists.")
+            Self::AlreadyExists => writeln!(f, "The note book already exists.")
         }
     }
 }
 
 #[derive(Error, Debug)]
 pub enum OpenError {
-    TodoListNotFound
+    NotFound,
 }
 impl Display for OpenError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::TodoListNotFound => writeln!(f, "The Todo List does not exists.")
+            Self::NotFound => writeln!(f, "The note book does not exists.")
         }
     }
 }
