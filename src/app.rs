@@ -73,17 +73,17 @@ impl App {
             Some(("new", sub_matches)) => {
                 let name = sub_matches.get_one::<String>("name").unwrap();
                 self.create_note_book(name)
-            },
+            }
             Some(("open", sub_matches)) => {
                 let name = sub_matches.get_one::<String>("name").unwrap();
                 self.open_note_book(name)
-            },
+            }
             Some(("remove", sub_matches)) => {
                 let name = sub_matches.get_one::<String>("name").unwrap();
                 self.delete_node_book(name)
-            },
+            }
             Some(("list", _sub_matches)) => self.list_note_books(),
-            _ => Err(AppError::CommandNotHandled)?
+            _ => Err(AppError::CommandNotHandled)?,
         }
     }
 
@@ -93,18 +93,16 @@ impl App {
             .about("CLI note book manager")
             .subcommand_required(true)
             .subcommand(
-                Command::new("new")
-                    .about("Create a new note book")
-                    .arg(Arg::new("name")
+                Command::new("new").about("Create a new note book").arg(
+                    Arg::new("name")
                         .value_name("NAME")
                         .help("Name of the note book to be created.")
                         .required(true),
                 ),
             )
             .subcommand(
-                Command::new("open")
-                    .about("Open a note book")
-                    .arg(Arg::new("name")
+                Command::new("open").about("Open a note book").arg(
+                    Arg::new("name")
                         .value_name("NAME")
                         .help("Name of the note book to open.")
                         .default_value(self.config.default_file.clone()),
@@ -114,16 +112,17 @@ impl App {
                 Command::new("remove")
                     .visible_alias("rm")
                     .about("Delete a note book")
-                    .arg(Arg::new("name")
-                        .value_name("NAME")
-                        .help("Name of the note book to be deleted.")
-                        .required(true),
-                ),
+                    .arg(
+                        Arg::new("name")
+                            .value_name("NAME")
+                            .help("Name of the note book to be deleted.")
+                            .required(true),
+                    ),
             )
             .subcommand(
                 Command::new("list")
                     .visible_alias("ls")
-                    .about("List existing note books")
+                    .about("List existing note books"),
             )
     }
 }
