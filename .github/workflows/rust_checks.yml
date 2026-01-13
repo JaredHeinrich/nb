@@ -27,4 +27,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run formatting checks
-        run: cargo +nightly fmt --all -- --check
+        run: cargo fmt --all -- --check
