@@ -1,13 +1,12 @@
-use std::{fmt::Display};
-
+use std::fmt::Display;
 
 #[derive(Debug)]
-pub enum Message{
+pub enum Message {
     ListOfNoteBooks(Vec<String>),
     CreatedNoteBook,
     EmptyMessage,
 }
-impl Display for Message{
+impl Display for Message {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CreatedNoteBook => {
@@ -19,7 +18,7 @@ impl Display for Message{
                 }
                 Ok(())
             }
-            Self::EmptyMessage => write!(f, "")
+            Self::EmptyMessage => write!(f, ""),
         }
     }
 }

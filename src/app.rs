@@ -3,16 +3,16 @@ use std::fs;
 use anyhow::{Ok, Result};
 use clap::{Arg, ArgMatches, Command};
 
-use crate::error::{ CreationError, OpenError};
-use crate::{config, file_operations};
+use crate::error::{CreationError, OpenError};
 use crate::message::Message;
+use crate::{config, file_operations};
 
-pub struct App{
-    config: config::Config
+pub struct App {
+    config: config::Config,
 }
 
-impl App{
-    pub fn new(config: config::Config) -> Self{
+impl App {
+    pub fn new(config: config::Config) -> Self {
         App { config }
     }
 
@@ -56,7 +56,6 @@ impl App{
         Ok(Message::EmptyMessage)
     }
 
-
     pub fn handle_command(&self, matches: ArgMatches) -> Result<Message> {
         self.check_state()?;
 
@@ -65,7 +64,7 @@ impl App{
             Some(("new", sub_matches)) => {
                 let name = sub_matches.get_one::<String>("name").unwrap();
                 self.create_note_book(name)
-            },
+            }
             _ => {
                 let name = matches.get_one::<String>("name").unwrap();
                 self.open_note_book(name)
@@ -77,21 +76,20 @@ impl App{
         Command::new("nb")
             .version("0.1.0")
             .about("CLI note book manager")
-            .arg(Arg::new("name")
-                .value_name("NAME")
-                .help("Name of the note book to open")
-                .default_value(self.config.default_file.clone())
-            )
-            .subcommand(Command::new("new")
-                .about("Create a new note book")
-                .arg(Arg::new("name")
+            .arg(
+                Arg::new("name")
                     .value_name("NAME")
-                    .help("Name of the note book that should be created.")
-                    .required(true)
-                )
+                    .help("Name of the note book to open")
+                    .default_value(self.config.default_file.clone()),
             )
-            .subcommand(Command::new("list")
-                .about("List existing note books")
+            .subcommand(
+                Command::new("new").about("Create a new note book").arg(
+                    Arg::new("name")
+                        .value_name("NAME")
+                        .help("Name of the note book that should be created.")
+                        .required(true),
+                ),
             )
+            .subcommand(Command::new("list").about("List existing note books"))
     }
 }
