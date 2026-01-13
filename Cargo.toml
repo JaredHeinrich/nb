@@ -1,12 +1,12 @@
 [package]
-name = "todo"
-version = "1.0.0"
+name = "nb"
+version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 clap = {version="4.5", features=["string"]}
-confy = {version="0.6"}
-dirs = "5.0"
+confy = {version="2.0"}
+dirs = {version="6.0"}
 serde = {version="1.0", features=["derive"]}
 anyhow = {version="1.0"}
 thiserror = {version="2.0"}

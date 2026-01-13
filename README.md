@@ -1,16 +1,18 @@
-# Readme
+# README
 
-Renaming: -> todo.rs
-
-Idee:
-Todo List management tool
-Todo Listen als normale .md files
+Idea:
+- Tool to manage note books
+- Note books are simple .md files
 
 Features:
-Eine Default datei -> todo
-Lokale Todo-Listen für Projekte? -> Default durch lokale Datei ersetzen?
-Möglichkeit fix die default Datei zu öffnen.
-Möglichkeit todo-liste in nvim (anderen Texteditoren) zu öffnen -> "todo <name>" ("todo" um default zu öffnen)
-Möglichkeit neue Todo-Listen zu erstellen -> "todo new <name>"
-Möglichkeit bestehende Todo-Listen aufzulisten -> "todo list"
-Möglichkeit in vim nach Todo-Listen zu suchen "<leader>td" -> nvim plugin?
+- create new note book 
+- open default note book
+- open specific note book
+- list existing note books
+- configure where note books saved
+- configure how note books are opened
+
+Feature ideas:
+- local note books for projects
+- delete note book
+- search for note books in nvim "\<leader\>nb" -> nvim plugin?
