@@ -9,7 +9,7 @@ pub enum CreationError {
 impl Display for CreationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AlreadyExists => writeln!(f, "The note book already exists.")
+            Self::AlreadyExists => writeln!(f, "The note book already exists."),
         }
     }
 }
@@ -21,7 +21,7 @@ pub enum OpenError {
 impl Display for OpenError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::NotFound => writeln!(f, "The note book does not exists.")
+            Self::NotFound => writeln!(f, "The note book does not exists."),
         }
     }
 }

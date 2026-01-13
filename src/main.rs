@@ -5,9 +5,9 @@ use crate::message::Message;
 
 mod app;
 mod config;
-mod message;
-mod file_operations;
 mod error;
+mod file_operations;
+mod message;
 
 fn main() {
     let app = App::new(config::Config::load());
@@ -22,6 +22,6 @@ fn main() {
 fn print_result(result: Result<Message>) {
     match result {
         Ok(m) => print!("{m}"),
-        Err(e) => print!("{e}")
+        Err(e) => print!("{e}"),
     }
 }
