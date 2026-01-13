@@ -4,6 +4,7 @@ use std::fmt::Display;
 pub enum Message {
     ListOfNoteBooks(Vec<String>),
     CreatedNoteBook,
+    DeletedNoteBook,
     EmptyMessage,
 }
 impl Display for Message {
@@ -11,6 +12,9 @@ impl Display for Message {
         match self {
             Self::CreatedNoteBook => {
                 writeln!(f, "Created note book")
+            }
+            Self::DeletedNoteBook => {
+                writeln!(f, "Deleted note book")
             }
             Self::ListOfNoteBooks(file_names) => {
                 for file_name in file_names {

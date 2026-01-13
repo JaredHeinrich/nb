@@ -14,6 +14,10 @@ pub fn get_files(dir: &PathBuf) -> Result<Vec<String>> {
     Ok(files)
 }
 
+pub fn delete_file(path: &PathBuf) -> Result<()> {
+    fs::remove_file(path).map_err(Error::from)
+}
+
 pub fn create_file(path: &PathBuf) -> Result<File> {
     File::create_new(path).map_err(Error::from)
 }
