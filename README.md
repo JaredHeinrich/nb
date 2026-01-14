@@ -20,3 +20,4 @@ Feature ideas:
 - completion script
 - file completion for open/delete commands
 - better way to open nb
+- sync note books to github
