@@ -1,4 +1,5 @@
 use std::fs;
+use std::process::Stdio;
 
 use anyhow::{Ok, Result};
 use clap::{Arg, ArgMatches, Command};
@@ -16,22 +17,35 @@ impl App {
         App { config }
     }
 
-    fn check_state(&self) -> Result<()> {
-        // ensure existence of nb_dir
-        if fs::exists(&self.config.nb_dir)? == false {
-            file_operations::create_dir(&self.config.nb_dir)?;
+    fn check_editor(&self) -> Result<()> {
+        let res = std::process::Command::new(&self.config.editor)
+            .arg("-v")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .map(|_| ())
+            .map_err(|_| AppError::EditorNotInstalled(self.config.editor.to_owned()).into());
+        res
+    }
+
+    fn check_dir_structure(&self) -> Result<()> {
+        if fs::exists(&self.config.nb_root_dir)? == false {
+            file_operations::create_dir(&self.config.nb_root_dir)?;
         }
-        // ensure existence of default_file
-        let mut default_nb_path = self.config.nb_dir.clone();
-        default_nb_path.push(&self.config.default_file);
+        Ok(())
+    }
+
+    fn check_default_notebook(&self) -> Result<()> {
+        let mut default_nb_path = self.config.nb_root_dir.clone();
+        default_nb_path.push(&self.config.default_notebook);
         if fs::exists(&default_nb_path)? == false {
             file_operations::create_file(&default_nb_path)?;
         }
         Ok(())
     }
 
-    fn create_note_book(&self, name: &str) -> Result<Message> {
-        let mut nb_path = self.config.nb_dir.clone();
+    fn create_notebook(&self, name: &str) -> Result<Message> {
+        let mut nb_path = self.config.nb_root_dir.clone();
         nb_path.push(&name);
         if fs::exists(&nb_path)? {
             Err(AppError::AlreadyExists)?;
@@ -41,7 +55,7 @@ impl App {
     }
 
     fn delete_node_book(&self, name: &str) -> Result<Message> {
-        let mut nb_path = self.config.nb_dir.clone();
+        let mut nb_path = self.config.nb_root_dir.clone();
         nb_path.push(&name);
         if !fs::exists(&nb_path)? {
             Err(AppError::NotFound)?;
@@ -50,39 +64,41 @@ impl App {
         Ok(Message::DeletedNoteBook)
     }
 
-    fn list_note_books(&self) -> Result<Message> {
-        let nb_dir = &self.config.nb_dir;
+    fn list_notebooks(&self) -> Result<Message> {
+        let nb_dir = &self.config.nb_root_dir;
         let files = file_operations::get_files(nb_dir)?;
         Ok(Message::ListOfNoteBooks(files))
     }
 
-    fn open_note_book(&self, name: &str) -> Result<Message> {
-        let mut note_book_path = self.config.nb_dir.to_owned();
-        note_book_path.push(&name);
-        if !fs::exists(&note_book_path)? {
+    fn open_notebook(&self, name: &str) -> Result<Message> {
+        let mut notebook_path = self.config.nb_root_dir.to_owned();
+        notebook_path.push(&name);
+        if !fs::exists(&notebook_path)? {
             Err(AppError::NotFound)?;
         }
-        file_operations::open_file(&self.config.editor, &note_book_path)?;
+        file_operations::open_file(&self.config.editor, &notebook_path)?;
         Ok(Message::EmptyMessage)
     }
 
     pub fn handle_command(&self, matches: ArgMatches) -> Result<Message> {
-        self.check_state()?;
+        self.check_editor()?;
+        self.check_dir_structure()?;
+        self.check_default_notebook()?;
 
         match matches.subcommand() {
             Some(("new", sub_matches)) => {
                 let name = sub_matches.get_one::<String>("name").unwrap();
-                self.create_note_book(name)
+                self.create_notebook(name)
             }
             Some(("open", sub_matches)) => {
                 let name = sub_matches.get_one::<String>("name").unwrap();
-                self.open_note_book(name)
+                self.open_notebook(name)
             }
             Some(("remove", sub_matches)) => {
                 let name = sub_matches.get_one::<String>("name").unwrap();
                 self.delete_node_book(name)
             }
-            Some(("list", _sub_matches)) => self.list_note_books(),
+            Some(("list", _sub_matches)) => self.list_notebooks(),
             _ => Err(AppError::CommandNotHandled)?,
         }
     }
@@ -105,7 +121,7 @@ impl App {
                     Arg::new("name")
                         .value_name("NAME")
                         .help("Name of the note book to open.")
-                        .default_value(self.config.default_file.clone()),
+                        .default_value(self.config.default_notebook.clone()),
                 ),
             )
             .subcommand(
