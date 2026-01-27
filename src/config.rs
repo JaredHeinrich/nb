@@ -3,20 +3,20 @@ use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub nb_dir: PathBuf,
-    pub default_file: String,
+    pub nb_root_dir: PathBuf,
+    pub default_notebook: String,
     pub editor: String,
 }
 
 impl Default for Config {
     fn default() -> Self {
-        let mut nb_dir: PathBuf = dirs::home_dir().unwrap();
-        nb_dir.push(".note_books");
-        let default_file = String::from("nb");
+        let mut nb_root_dir: PathBuf = dirs::home_dir().unwrap();
+        nb_root_dir.push(".notebooks");
+        let default_notebook = String::from("nb");
         let editor = String::from("nvim");
         Self {
-            nb_dir,
-            default_file,
+            nb_root_dir,
+            default_notebook,
             editor,
         }
     }

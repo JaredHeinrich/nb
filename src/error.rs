@@ -7,6 +7,7 @@ pub enum AppError {
     AlreadyExists,
     NotFound,
     CommandNotHandled,
+    EditorNotInstalled(String),
 }
 impl Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -14,6 +15,9 @@ impl Display for AppError {
             Self::AlreadyExists => writeln!(f, "The note book already exists."),
             Self::NotFound => writeln!(f, "The note book does not exists."),
             Self::CommandNotHandled => writeln!(f, "Internal Error: Command not handled."),
+            Self::EditorNotInstalled(editor) => {
+                writeln!(f, "The configured editor \"{editor}\" is not installed.")
+            }
         }
     }
 }
