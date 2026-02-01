@@ -5,6 +5,7 @@ pub enum Message {
     ListOfNoteBooks(Vec<String>),
     CreatedNoteBook,
     DeletedNoteBook,
+    CompletionScript(String),
     EmptyMessage,
 }
 impl Display for Message {
@@ -22,6 +23,7 @@ impl Display for Message {
                 }
                 Ok(())
             }
+            Self::CompletionScript(s) => writeln!(f, "{s}"),
             Self::EmptyMessage => write!(f, ""),
         }
     }
