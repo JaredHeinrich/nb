@@ -1,6 +1,6 @@
+use anyhow::Result;
 use clap::{builder::EnumValueParser, Arg, Command};
 use clap_complete::Shell;
-use anyhow::Result;
 
 use crate::{config::Config, utils};
 
@@ -67,7 +67,7 @@ pub fn build_command_with_config(config: &Config) -> Result<Command> {
                         .value_parser(EnumValueParser::<Shell>::new())
                         .help("Shell for which to add the completions.")
                         .required(true),
-                )
+                ),
         );
     Ok(cmd)
 }
@@ -99,10 +99,22 @@ mod tests {
         let cmd = build_command_with_config(&config).unwrap();
         assert!(cmd.clone().try_get_matches_from(["nb", "new"]).is_err());
         assert!(cmd.clone().try_get_matches_from(["nb", "new", ""]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "new", " "]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "new", "\r"]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "new", "\n"]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "new", "\t"]).is_err());
+        assert!(cmd
+            .clone()
+            .try_get_matches_from(["nb", "new", " "])
+            .is_err());
+        assert!(cmd
+            .clone()
+            .try_get_matches_from(["nb", "new", "\r"])
+            .is_err());
+        assert!(cmd
+            .clone()
+            .try_get_matches_from(["nb", "new", "\n"])
+            .is_err());
+        assert!(cmd
+            .clone()
+            .try_get_matches_from(["nb", "new", "\t"])
+            .is_err());
     }
 
     #[test]
@@ -127,11 +139,26 @@ mod tests {
     fn test_open_empty_name() {
         let config = Config::default();
         let cmd = build_command_with_config(&config).unwrap();
-        assert!(cmd.clone().try_get_matches_from(["nb", "open", ""]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "open", " "]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "open", "\r"]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "open", "\n"]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "open", "\t"]).is_err());
+        assert!(cmd
+            .clone()
+            .try_get_matches_from(["nb", "open", ""])
+            .is_err());
+        assert!(cmd
+            .clone()
+            .try_get_matches_from(["nb", "open", " "])
+            .is_err());
+        assert!(cmd
+            .clone()
+            .try_get_matches_from(["nb", "open", "\r"])
+            .is_err());
+        assert!(cmd
+            .clone()
+            .try_get_matches_from(["nb", "open", "\n"])
+            .is_err());
+        assert!(cmd
+            .clone()
+            .try_get_matches_from(["nb", "open", "\t"])
+            .is_err());
     }
 
     #[test]
@@ -148,14 +175,20 @@ mod tests {
         let matches = cmd.clone().get_matches_from(["nb", "open"]);
         let (subcommand, matches) = matches.subcommand().unwrap();
         assert_eq!(subcommand, "open");
-        assert_eq!(*matches.get_one::<String>("name").unwrap(), config.default_notebook);
+        assert_eq!(
+            *matches.get_one::<String>("name").unwrap(),
+            config.default_notebook
+        );
     }
 
     #[test]
     fn test_open() {
         let config = Config::default();
         let cmd = build_command_with_config(&config).unwrap();
-        let matches = cmd.clone().try_get_matches_from(["nb", "open", "my_notebook"]).unwrap();
+        let matches = cmd
+            .clone()
+            .try_get_matches_from(["nb", "open", "my_notebook"])
+            .unwrap();
         assert!(matches.try_get_one::<String>("name").is_err());
         let (subcommand, matches) = matches.subcommand().unwrap();
         assert_eq!(subcommand, "open");
@@ -173,19 +206,25 @@ mod tests {
     fn test_completions_no_argument_name() {
         let config = Config::default();
         let cmd = build_command_with_config(&config).unwrap();
-        assert!(cmd.try_get_matches_from(["nb", "completions", "zsh"]).is_err());
+        assert!(cmd
+            .try_get_matches_from(["nb", "completions", "zsh"])
+            .is_err());
     }
 
     #[test]
     fn test_completions() {
         let config = Config::default();
         let cmd = build_command_with_config(&config).unwrap();
-        let matches = cmd.clone().get_matches_from(["nb", "completions", "-s", "zsh"]);
+        let matches = cmd
+            .clone()
+            .get_matches_from(["nb", "completions", "-s", "zsh"]);
         let (subcommand, matches) = matches.subcommand().unwrap();
         assert_eq!(subcommand, "completions");
         assert_eq!(*matches.get_one::<Shell>("shell").unwrap(), Shell::Zsh);
 
-        let matches = cmd.clone().get_matches_from(["nb", "completions", "--shell", "zsh"]);
+        let matches = cmd
+            .clone()
+            .get_matches_from(["nb", "completions", "--shell", "zsh"]);
         let (subcommand, matches) = matches.subcommand().unwrap();
         assert_eq!(subcommand, "completions");
         assert_eq!(*matches.get_one::<Shell>("shell").unwrap(), Shell::Zsh);
