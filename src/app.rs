@@ -7,17 +7,18 @@ use clap_complete::Shell;
 
 use crate::cli::build_command_with_config;
 use crate::error::AppError;
+use crate::file_operations::FileOperations;
 use crate::message::Message;
-use crate::{config, file_operations, utils};
+use crate::{config, utils};
 
-#[derive(Default)]
-pub struct App {
+pub struct App<FS: FileOperations> {
     pub config: config::Config,
+    fs: FS,
 }
 
-impl App {
-    pub fn new(config: config::Config) -> Self {
-        App { config }
+impl<FS: FileOperations> App<FS> {
+    pub fn new(config: config::Config, fs: FS) -> Self {
+        Self { config , fs }
     }
 
     fn check_editor(&self) -> Result<()> {
@@ -31,54 +32,54 @@ impl App {
         res
     }
 
-    fn check_dir_structure(&self) -> Result<()> {
-        if fs::exists(&self.config.nb_root_dir)? == false {
-            file_operations::create_dir(&self.config.nb_root_dir)?;
+    fn check_dir_structure(&mut self) -> Result<()> {
+        if self.fs.exists(&self.config.nb_root_dir)? == false {
+            self.fs.create_dir(&self.config.nb_root_dir)?;
         }
         Ok(())
     }
 
-    fn check_default_notebook(&self) -> Result<()> {
+    fn check_default_notebook(&mut self) -> Result<()> {
         let mut default_nb_path = self.config.nb_root_dir.clone();
         default_nb_path.push(&self.config.default_notebook);
-        if fs::exists(&default_nb_path)? == false {
-            file_operations::create_file(&default_nb_path)?;
+        if self.fs.exists(&default_nb_path)? == false {
+            self.fs.create_file(&default_nb_path)?;
         }
         Ok(())
     }
 
-    fn create_notebook(&self, name: &str) -> Result<Message> {
+    fn create_notebook(&mut self, name: &str) -> Result<Message> {
         let mut nb_path = self.config.nb_root_dir.clone();
         nb_path.push(&name);
         if fs::exists(&nb_path)? {
             Err(AppError::AlreadyExists)?;
         }
-        file_operations::create_file(&nb_path)?;
+        self.fs.create_file(&nb_path)?;
         Ok(Message::CreatedNoteBook)
     }
 
-    fn delete_node_book(&self, name: &str) -> Result<Message> {
+    fn delete_node_book(&mut self, name: &str) -> Result<Message> {
         let mut nb_path = self.config.nb_root_dir.clone();
         nb_path.push(&name);
         if !fs::exists(&nb_path)? {
             Err(AppError::NotFound)?;
         }
-        file_operations::delete_file(&nb_path)?;
+        self.fs.delete_file(&nb_path)?;
         Ok(Message::DeletedNoteBook)
     }
 
     pub fn list_notebooks(&self) -> Result<Message> {
-        let files = utils::list_notebooks(&self.config)?;
+        let files = utils::list_notebooks(&self.config, &self.fs)?;
         Ok(Message::ListOfNoteBooks(files))
     }
 
-    fn open_notebook(&self, name: &str) -> Result<Message> {
+    fn open_notebook(&mut self, name: &str) -> Result<Message> {
         let mut notebook_path = self.config.nb_root_dir.to_owned();
         notebook_path.push(&name);
         if !fs::exists(&notebook_path)? {
             Err(AppError::NotFound)?;
         }
-        file_operations::open_file(&self.config.editor, &notebook_path)?;
+        self.fs.open_file(&self.config.editor, &notebook_path)?;
         Ok(Message::EmptyMessage)
     }
 
@@ -86,7 +87,7 @@ impl App {
         todo!("Return completion script for specified shell");
     }
 
-    pub fn handle_command(&self, matches: ArgMatches) -> Result<Message> {
+    pub fn handle_command(&mut self, matches: ArgMatches) -> Result<Message> {
         self.check_editor()?;
         self.check_dir_structure()?;
         self.check_default_notebook()?;
@@ -113,6 +114,6 @@ impl App {
         }
     }
     pub fn build_command(&self) -> Result<Command> {
-        build_command_with_config(&self.config)
+        build_command_with_config(&self.config, &self.fs)
     }
 }

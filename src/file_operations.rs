@@ -6,30 +6,50 @@ use std::{
     process::Command,
 };
 
-pub fn get_files(dir: &PathBuf) -> Result<Vec<String>> {
-    let file_iter = fs::read_dir(dir)?;
-    let files: Vec<String> = file_iter
-        .map(|file| file.unwrap().file_name().into_string().unwrap())
-        .collect();
-    Ok(files)
+use crate::error::FileSystemError;
+
+pub trait FileOperations {
+    fn get_files(&self, dir: &PathBuf) -> Result<Vec<String>>;
+    fn delete_file(&mut self,path: &PathBuf) -> Result<()>;
+    fn create_file(&mut self, path: &PathBuf) -> Result<()>;
+    fn create_dir(&mut self, path: &PathBuf) -> Result<()>;
+    fn open_file(&mut self, editor_command: &str, path: &PathBuf) -> Result<()>;
+    fn exists(&self, path: &PathBuf) -> Result<bool>;
 }
 
-pub fn delete_file(path: &PathBuf) -> Result<()> {
-    fs::remove_file(path).map_err(Error::from)
-}
+pub struct FileSystem;
+impl FileOperations for FileSystem {
+    fn get_files(&self, dir: &PathBuf) -> Result<Vec<String>> {
+        let file_iter = fs::read_dir(dir)?;
+        let files: Vec<String> = file_iter
+            .map(|file| file.unwrap().file_name().into_string().unwrap())
+            .collect();
+        Ok(files)
+    }
 
-pub fn create_file(path: &PathBuf) -> Result<File> {
-    File::create_new(path).map_err(Error::from)
-}
+    fn delete_file(&mut self, path: &PathBuf) -> Result<()> {
+        fs::remove_file(path).map_err(Error::from)
+    }
 
-pub fn create_dir(path: &PathBuf) -> Result<()> {
-    fs::create_dir_all(path).map_err(Error::from)
-}
+    fn create_file(&mut self, path: &PathBuf) -> Result<()> {
+        File::create_new(path).map_err(Error::from).map(|_| ())
+    }
 
-pub fn open_file(editor_command: &str, path: &PathBuf) -> Result<()> {
-    Command::new(editor_command)
-        .arg(path.as_os_str())
-        .status()
-        .map(|_| ())
-        .map_err(|e| e.into())
+    fn create_dir(&mut self, path: &PathBuf) -> Result<()> {
+        fs::create_dir_all(path).map_err(Error::from)
+    }
+
+    fn open_file(&mut self, editor_command: &str, path: &PathBuf) -> Result<()> {
+        if !path.is_file() {
+            return Err(FileSystemError::NotAFile(path.clone()).into());
+        }
+        Command::new(editor_command)
+            .arg(path.as_os_str())
+            .status()
+            .map(|_| ())
+            .map_err(|e| e.into())
+    }
+    fn exists(&self, path: &PathBuf) -> Result<bool> {
+        fs::exists(path).map_err(Into::into)
+    }
 }

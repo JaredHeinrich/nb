@@ -2,15 +2,16 @@ use anyhow::Result;
 use clap::{builder::EnumValueParser, Arg, Command};
 use clap_complete::Shell;
 
-use crate::{config::Config, utils};
+use crate::{config::Config, file_operations::{FileOperations, FileSystem}, utils};
 
 pub fn build_command() -> Command {
     let config = Config::load();
-    build_command_with_config(&config).unwrap()
+    let fs = FileSystem;
+    build_command_with_config(&config, &fs).unwrap()
 }
 
-pub fn build_command_with_config(config: &Config) -> Result<Command> {
-    let notebooks = utils::list_notebooks(&config)?;
+pub fn build_command_with_config<FS: FileOperations>(config: &Config, fs: &FS) -> Result<Command> {
+    let notebooks = utils::list_notebooks(&config, fs)?;
     let cmd = Command::new("nb")
         .version("0.1.0")
         .about("CLI note book manager")
@@ -74,19 +75,28 @@ pub fn build_command_with_config(config: &Config) -> Result<Command> {
 
 #[cfg(test)]
 mod tests {
+    use crate::mock_fs::MockFileSystem;
+
     use super::*;
+
+    fn create_mocked_fs(config: &Config) -> MockFileSystem {
+        let notebooks: Vec<String> = ["nb", "todo", "my_notebook"].map(|str| str.to_owned()).to_vec();
+        MockFileSystem::new(config.nb_root_dir.clone(), notebooks)
+    }
 
     #[test]
     fn test_nb_no_subcommand() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         assert!(cmd.try_get_matches_from(["nb"]).is_err());
     }
 
     #[test]
     fn test_nb_invalid_subcommands() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         assert!(cmd.clone().try_get_matches_from(["nb", " "]).is_err());
         assert!(cmd.clone().try_get_matches_from(["nb", "test"]).is_err());
         assert!(cmd.clone().try_get_matches_from(["nb", "-t"]).is_err());
@@ -96,7 +106,8 @@ mod tests {
     #[test]
     fn test_new_no_name() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         assert!(cmd.clone().try_get_matches_from(["nb", "new"]).is_err());
         assert!(cmd.clone().try_get_matches_from(["nb", "new", ""]).is_err());
         assert!(cmd
@@ -120,14 +131,16 @@ mod tests {
     #[test]
     fn test_new_multiple_names() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         assert!(cmd.try_get_matches_from(["nb", "new", "a", "b"]).is_err());
     }
 
     #[test]
     fn test_new() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         let matches = cmd.clone().get_matches_from(["nb", "new", "my_notebook"]);
         assert!(matches.try_get_one::<String>("name").is_err());
         let (subcommand, matches) = matches.subcommand().unwrap();
@@ -138,7 +151,8 @@ mod tests {
     #[test]
     fn test_open_empty_name() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         assert!(cmd
             .clone()
             .try_get_matches_from(["nb", "open", ""])
@@ -164,14 +178,16 @@ mod tests {
     #[test]
     fn test_open_multiple_names() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         assert!(cmd.try_get_matches_from(["nb", "open", "a", "b"]).is_err());
     }
 
     #[test]
     fn test_open_no_name() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         let matches = cmd.clone().get_matches_from(["nb", "open"]);
         let (subcommand, matches) = matches.subcommand().unwrap();
         assert_eq!(subcommand, "open");
@@ -184,7 +200,8 @@ mod tests {
     #[test]
     fn test_open() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         let matches = cmd
             .clone()
             .try_get_matches_from(["nb", "open", "my_notebook"])
@@ -198,14 +215,16 @@ mod tests {
     #[test]
     fn test_completions_no_shell() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         assert!(cmd.try_get_matches_from(["nb", "completions"]).is_err());
     }
 
     #[test]
     fn test_completions_no_argument_name() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         assert!(cmd
             .try_get_matches_from(["nb", "completions", "zsh"])
             .is_err());
@@ -214,7 +233,8 @@ mod tests {
     #[test]
     fn test_completions() {
         let config = Config::default();
-        let cmd = build_command_with_config(&config).unwrap();
+        let fs = create_mocked_fs(&config);
+        let cmd = build_command_with_config(&config, &fs).unwrap();
         let matches = cmd
             .clone()
             .get_matches_from(["nb", "completions", "-s", "zsh"]);
