@@ -1,14 +1,14 @@
 use anyhow::Result;
 use app::App;
 
-use crate::{message::Message};
+use crate::message::Message;
 
 mod app;
+mod cli;
 mod config;
 mod error;
 mod file_operations;
 mod message;
-mod cli;
 mod utils;
 
 fn main() {

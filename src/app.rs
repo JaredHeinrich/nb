@@ -108,7 +108,6 @@ impl App {
             Some(("completions", sub_matches)) => {
                 let shell = sub_matches.get_one::<Shell>("shell").unwrap();
                 self.get_completion_script(shell)
-
             }
             _ => Err(AppError::CommandNotHandled)?,
         }
