@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, path::PathBuf};
 
 use thiserror::Error;
 
@@ -18,6 +18,19 @@ impl Display for AppError {
             Self::EditorNotInstalled(editor) => {
                 writeln!(f, "The configured editor \"{editor}\" is not installed.")
             }
+        }
+    }
+}
+
+#[derive(Error, Debug)]
+pub enum FileSystemError {
+    NotAFile(PathBuf),
+}
+
+impl Display for FileSystemError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::NotAFile(path) => writeln!(f, "\"{path:?}\" is not a file."),
         }
     }
 }

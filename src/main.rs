@@ -1,7 +1,7 @@
 use anyhow::Result;
 use app::App;
 
-use crate::message::Message;
+use crate::{file_operations::FileSystem, message::Message};
 
 mod app;
 mod cli;
@@ -10,12 +10,15 @@ mod error;
 mod file_operations;
 mod message;
 mod utils;
+#[cfg(test)]
+mod mock_fs;
 
 fn main() {
     clap_complete::CompleteEnv::with_factory(cli::build_command).complete();
 
     let config = config::Config::load();
-    let app = App::new(config);
+    let fs = FileSystem;
+    let mut app = App::new(config, fs);
     let command = app.build_command().unwrap(); // TODO remove unwrap
     let matches = command.get_matches();
     let result = app.handle_command(matches);
