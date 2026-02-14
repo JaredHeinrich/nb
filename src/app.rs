@@ -85,12 +85,25 @@ impl<FS: FileOperations> App<FS> {
 
     fn get_completion_script(&self, shell: &Shell) -> Result<Message> {
         match shell {
-            Shell::Zsh => Ok(Message::CompletionScript("echo \"source <(COMPLETE=zsh your_program)\" >> ~/.zshrc".to_owned())),
-            Shell::Bash => Ok(Message::CompletionScript("echo \"source <(COMPLETE=bash your_program)\" >> ~/.bashrc".to_owned())),
-            Shell::Fish => Ok(Message::CompletionScript("echo \"source (COMPLETE=fish your_program | psub)\" >> ~/.config/fish/config.fish".to_owned())),
-            Shell::Elvish => Ok(Message::CompletionScript("echo \"eval (E:COMPLETE=elvish your_program | slurp)\" >> ~/.elvish/rc.elv".to_owned())),
-            Shell::PowerShell => Ok(Message::CompletionScript("echo \"COMPLETE=powershell your_program | Invoke-Expression\" >> $PROFILE".to_owned())),
-            _ => Err(AppError::UnknownShell.into())
+            Shell::Zsh => Ok(Message::CompletionScript(
+                "echo \"source <(COMPLETE=zsh your_program)\" >> ~/.zshrc".to_owned(),
+            )),
+            Shell::Bash => Ok(Message::CompletionScript(
+                "echo \"source <(COMPLETE=bash your_program)\" >> ~/.bashrc".to_owned(),
+            )),
+            Shell::Fish => Ok(Message::CompletionScript(
+                "echo \"source (COMPLETE=fish your_program | psub)\" >> ~/.config/fish/config.fish"
+                    .to_owned(),
+            )),
+            Shell::Elvish => Ok(Message::CompletionScript(
+                "echo \"eval (E:COMPLETE=elvish your_program | slurp)\" >> ~/.elvish/rc.elv"
+                    .to_owned(),
+            )),
+            Shell::PowerShell => Ok(Message::CompletionScript(
+                "echo \"COMPLETE=powershell your_program | Invoke-Expression\" >> $PROFILE"
+                    .to_owned(),
+            )),
+            _ => Err(AppError::UnknownShell.into()),
         }
     }
 

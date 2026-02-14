@@ -18,7 +18,7 @@ impl Display for AppError {
             Self::CommandNotHandled => writeln!(f, "Internal Error: Command not handled."),
             Self::EditorNotInstalled(editor) => {
                 writeln!(f, "The configured editor \"{editor}\" is not installed.")
-            },
+            }
             Self::UnknownShell => writeln!(f, "Shell not recognized."),
         }
     }
