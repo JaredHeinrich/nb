@@ -10,7 +10,7 @@ use crate::error::FileSystemError;
 
 pub trait FileOperations {
     fn get_files(&self, dir: &PathBuf) -> Result<Vec<String>>;
-    fn delete_file(&mut self,path: &PathBuf) -> Result<()>;
+    fn delete_file(&mut self, path: &PathBuf) -> Result<()>;
     fn create_file(&mut self, path: &PathBuf) -> Result<()>;
     fn create_dir(&mut self, path: &PathBuf) -> Result<()>;
     fn open_file(&mut self, editor_command: &str, path: &PathBuf) -> Result<()>;
