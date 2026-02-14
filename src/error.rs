@@ -8,6 +8,7 @@ pub enum AppError {
     NotFound,
     CommandNotHandled,
     EditorNotInstalled(String),
+    UnknownShell,
 }
 impl Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -17,7 +18,8 @@ impl Display for AppError {
             Self::CommandNotHandled => writeln!(f, "Internal Error: Command not handled."),
             Self::EditorNotInstalled(editor) => {
                 writeln!(f, "The configured editor \"{editor}\" is not installed.")
-            }
+            },
+            Self::UnknownShell => writeln!(f, "Shell not recognized."),
         }
     }
 }

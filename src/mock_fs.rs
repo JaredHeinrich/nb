@@ -93,13 +93,8 @@ impl FileOperations for MockFileSystem {
     }
 
     fn exists(&self, path: &PathBuf) -> Result<bool> {
-        if *path == self.notebook_root_dir {
+        if self.is_dir(path) || self.is_file(path) {
             return Ok(true);
-        }
-        if let Ok(file_name) = extract_file_name(&self.notebook_root_dir, path) {
-            if self.files.contains(&file_name) {
-                return Ok(true);
-            }
         }
         return Ok(false);
     }
