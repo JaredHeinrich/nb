@@ -9,9 +9,9 @@ mod config;
 mod error;
 mod file_operations;
 mod message;
-mod utils;
 #[cfg(test)]
 mod mock_fs;
+mod utils;
 
 fn main() {
     clap_complete::CompleteEnv::with_factory(cli::build_command).complete();

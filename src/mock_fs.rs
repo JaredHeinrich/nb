@@ -25,10 +25,14 @@ pub struct MockFileSystem {
 
 impl MockFileSystem {
     pub fn new(notebook_root_dir: PathBuf, notebooks: Vec<String>) -> Self {
-        Self { opened_files: Vec::new(), notebook_root_dir, files: notebooks }
+        Self {
+            opened_files: Vec::new(),
+            notebook_root_dir,
+            files: notebooks,
+        }
     }
 
-    pub fn opened_files(&self) -> &Vec<PathBuf>{
+    pub fn opened_files(&self) -> &Vec<PathBuf> {
         &self.opened_files
     }
 

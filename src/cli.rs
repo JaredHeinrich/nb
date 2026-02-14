@@ -2,7 +2,11 @@ use anyhow::Result;
 use clap::{builder::EnumValueParser, Arg, Command};
 use clap_complete::Shell;
 
-use crate::{config::Config, file_operations::{FileOperations, FileSystem}, utils};
+use crate::{
+    config::Config,
+    file_operations::{FileOperations, FileSystem},
+    utils,
+};
 
 pub fn build_command() -> Command {
     let config = Config::load();
@@ -80,7 +84,9 @@ mod tests {
     use super::*;
 
     fn create_mocked_fs(config: &Config) -> MockFileSystem {
-        let notebooks: Vec<String> = ["nb", "todo", "my_notebook"].map(|str| str.to_owned()).to_vec();
+        let notebooks: Vec<String> = ["nb", "todo", "my_notebook"]
+            .map(|str| str.to_owned())
+            .to_vec();
         MockFileSystem::new(config.nb_root_dir.clone(), notebooks)
     }
 

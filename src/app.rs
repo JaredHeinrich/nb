@@ -18,7 +18,7 @@ pub struct App<FS: FileOperations> {
 
 impl<FS: FileOperations> App<FS> {
     pub fn new(config: config::Config, fs: FS) -> Self {
-        Self { config , fs }
+        Self { config, fs }
     }
 
     fn check_editor(&self) -> Result<()> {
