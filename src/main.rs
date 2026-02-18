@@ -14,12 +14,10 @@ mod mock_fs;
 mod utils;
 
 fn main() {
-    clap_complete::CompleteEnv::with_factory(cli::build_command).complete();
-
     let config = config::Config::load();
     let fs = FileSystem;
     let mut app = App::new(config, fs);
-    let command = app.build_command().unwrap(); // TODO remove unwrap
+    let command = cli::build_command();
     let matches = command.get_matches();
     let result = app.handle_command(matches);
     print_result(result);

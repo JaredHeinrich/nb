@@ -23,10 +23,7 @@ impl Display for Message {
                 }
                 Ok(())
             }
-            Self::CompletionScript(s) => {
-                writeln!(f, "To activate completions execute:")?;
-                writeln!(f, "{s}")
-            }
+            Self::CompletionScript(s) => writeln!(f, "{s}"),
             Self::EmptyMessage => write!(f, ""),
         }
     }

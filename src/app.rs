@@ -2,10 +2,9 @@ use std::fs;
 use std::process::Stdio;
 
 use anyhow::Result;
-use clap::{ArgMatches, Command};
-use clap_complete::Shell;
+use clap::ArgMatches;
 
-use crate::cli::build_command_with_config;
+use crate::cli::Shell;
 use crate::error::AppError;
 use crate::file_operations::FileOperations;
 use crate::message::Message;
@@ -85,25 +84,9 @@ impl<FS: FileOperations> App<FS> {
 
     fn get_completion_script(&self, shell: &Shell) -> Result<Message> {
         match shell {
-            Shell::Zsh => Ok(Message::CompletionScript(
-                "echo \"source <(COMPLETE=zsh your_program)\" >> ~/.zshrc".to_owned(),
-            )),
-            Shell::Bash => Ok(Message::CompletionScript(
-                "echo \"source <(COMPLETE=bash your_program)\" >> ~/.bashrc".to_owned(),
-            )),
-            Shell::Fish => Ok(Message::CompletionScript(
-                "echo \"source (COMPLETE=fish your_program | psub)\" >> ~/.config/fish/config.fish"
-                    .to_owned(),
-            )),
-            Shell::Elvish => Ok(Message::CompletionScript(
-                "echo \"eval (E:COMPLETE=elvish your_program | slurp)\" >> ~/.elvish/rc.elv"
-                    .to_owned(),
-            )),
-            Shell::PowerShell => Ok(Message::CompletionScript(
-                "echo \"COMPLETE=powershell your_program | Invoke-Expression\" >> $PROFILE"
-                    .to_owned(),
-            )),
-            _ => Err(AppError::UnknownShell.into()),
+            Shell::Zsh => {
+                Ok(Message::CompletionScript(include_str!("../completions/_nb").to_owned()))
+            },
         }
     }
 
@@ -132,8 +115,5 @@ impl<FS: FileOperations> App<FS> {
             }
             _ => Err(AppError::CommandNotHandled)?,
         }
-    }
-    pub fn build_command(&self) -> Result<Command> {
-        build_command_with_config(&self.config, &self.fs)
     }
 }
