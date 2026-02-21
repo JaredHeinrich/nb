@@ -1,5 +1,7 @@
-use clap::{builder::{EnumValueParser, PossibleValue}, Arg, Command, ValueEnum};
-
+use clap::{
+    builder::{EnumValueParser, PossibleValue},
+    Arg, Command, ValueEnum,
+};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Shell {
@@ -8,14 +10,12 @@ pub enum Shell {
 impl ValueEnum for Shell {
     fn value_variants<'a>() -> &'a [Self] {
         &[
-            //Shell::Bash,
             Shell::Zsh,
         ]
     }
 
     fn to_possible_value(&self) -> Option<PossibleValue> {
         Some(match self {
-            //Shell::Bash => PossibleValue::new("bash"),
             Shell::Zsh => PossibleValue::new("zsh"),
         })
     }
@@ -47,7 +47,7 @@ pub fn build_command() -> Command {
             Command::new("open").about("Open a note book").arg(
                 Arg::new("name")
                     .value_name("NAME")
-                    .help("Name of the note book to open.")
+                    .help("Name of the note book to open."),
             ),
         )
         .subcommand(

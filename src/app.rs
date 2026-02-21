@@ -7,10 +7,10 @@ use anyhow::Result;
 use clap::ArgMatches;
 
 use crate::cli::Shell;
+use crate::config;
 use crate::error::AppError;
 use crate::file_operations::FileOperations;
 use crate::message::Message;
-use crate::config;
 
 const NB_ROOT_DIR: &'static str = ".notebooks";
 
@@ -23,7 +23,11 @@ pub struct App<FS: FileOperations> {
 impl<FS: FileOperations> App<FS> {
     pub fn new(config: config::Config, fs: FS) -> Self {
         let nb_root_dir = PathBuf::from_str(NB_ROOT_DIR).unwrap();
-        Self { config, nb_root_dir, fs }
+        Self {
+            config,
+            nb_root_dir,
+            fs,
+        }
     }
 
     fn check_editor(&self) -> Result<()> {
@@ -90,9 +94,9 @@ impl<FS: FileOperations> App<FS> {
 
     fn get_completion_script(&self, shell: &Shell) -> Result<Message> {
         match shell {
-            Shell::Zsh => {
-                Ok(Message::CompletionScript(include_str!("../completions/_nb").to_owned()))
-            },
+            Shell::Zsh => Ok(Message::CompletionScript(
+                include_str!("../completions/_nb").to_owned(),
+            )),
         }
     }
 

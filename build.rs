@@ -1,4 +1,4 @@
-use clap_complete::aot::{Zsh};
+use clap_complete::aot::Zsh;
 use clap_complete::generate_to;
 use std::env;
 use std::io::Error;
