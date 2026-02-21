@@ -20,9 +20,9 @@ pub trait FileOperations {
 pub struct FileSystem;
 impl FileOperations for FileSystem {
     fn get_files(&self, dir: &PathBuf) -> Result<Vec<String>> {
-        let file_iter = fs::read_dir(dir)?;
-        let files: Vec<String> = file_iter
+        let files: Vec<String> = fs::read_dir(dir)?
             .map(|file| file.unwrap().file_name().into_string().unwrap())
+            .filter(|file| !file.starts_with("."))
             .collect();
         Ok(files)
     }

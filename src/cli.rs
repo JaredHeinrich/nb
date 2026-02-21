@@ -26,6 +26,8 @@ pub fn build_command() -> Command {
         .version("0.1.0")
         .about("CLI note book manager")
         .subcommand_required(true)
+        .flatten_help(true)
+        .disable_help_subcommand(true)
         .subcommand(
             Command::new("new").about("Create a new note book").arg(
                 Arg::new("name")
