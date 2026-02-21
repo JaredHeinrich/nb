@@ -11,7 +11,6 @@ mod file_operations;
 mod message;
 #[cfg(test)]
 mod mock_fs;
-mod utils;
 
 fn main() {
     let config = config::Config::load();

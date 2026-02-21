@@ -1,5 +1,7 @@
 use std::fs;
+use std::path::PathBuf;
 use std::process::Stdio;
+use std::str::FromStr;
 
 use anyhow::Result;
 use clap::ArgMatches;
@@ -8,16 +10,20 @@ use crate::cli::Shell;
 use crate::error::AppError;
 use crate::file_operations::FileOperations;
 use crate::message::Message;
-use crate::{config, utils};
+use crate::config;
+
+const NB_ROOT_DIR: &'static str = ".notebooks";
 
 pub struct App<FS: FileOperations> {
     pub config: config::Config,
+    pub nb_root_dir: PathBuf,
     fs: FS,
 }
 
 impl<FS: FileOperations> App<FS> {
     pub fn new(config: config::Config, fs: FS) -> Self {
-        Self { config, fs }
+        let nb_root_dir = PathBuf::from_str(NB_ROOT_DIR).unwrap();
+        Self { config, nb_root_dir, fs }
     }
 
     fn check_editor(&self) -> Result<()> {
@@ -32,14 +38,14 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn check_dir_structure(&mut self) -> Result<()> {
-        if self.fs.exists(&self.config.nb_root_dir)? == false {
-            self.fs.create_dir(&self.config.nb_root_dir)?;
+        if self.fs.exists(&self.nb_root_dir)? == false {
+            self.fs.create_dir(&self.nb_root_dir)?;
         }
         Ok(())
     }
 
     fn check_default_notebook(&mut self) -> Result<()> {
-        let mut default_nb_path = self.config.nb_root_dir.clone();
+        let mut default_nb_path = self.nb_root_dir.clone();
         default_nb_path.push(&self.config.default_notebook);
         if self.fs.exists(&default_nb_path)? == false {
             self.fs.create_file(&default_nb_path)?;
@@ -48,7 +54,7 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn create_notebook(&mut self, name: &str) -> Result<Message> {
-        let mut nb_path = self.config.nb_root_dir.clone();
+        let mut nb_path = self.nb_root_dir.clone();
         nb_path.push(&name);
         if fs::exists(&nb_path)? {
             Err(AppError::AlreadyExists)?;
@@ -58,7 +64,7 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn delete_node_book(&mut self, name: &str) -> Result<Message> {
-        let mut nb_path = self.config.nb_root_dir.clone();
+        let mut nb_path = self.nb_root_dir.clone();
         nb_path.push(&name);
         if !fs::exists(&nb_path)? {
             Err(AppError::NotFound)?;
@@ -68,12 +74,12 @@ impl<FS: FileOperations> App<FS> {
     }
 
     pub fn list_notebooks(&self) -> Result<Message> {
-        let files = utils::list_notebooks(&self.config, &self.fs)?;
+        let files = self.fs.get_files(&self.nb_root_dir)?;
         Ok(Message::ListOfNoteBooks(files))
     }
 
     fn open_notebook(&mut self, name: &str) -> Result<Message> {
-        let mut notebook_path = self.config.nb_root_dir.to_owned();
+        let mut notebook_path = self.nb_root_dir.to_owned();
         notebook_path.push(&name);
         if !fs::exists(&notebook_path)? {
             Err(AppError::NotFound)?;
