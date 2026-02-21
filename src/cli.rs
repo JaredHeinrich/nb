@@ -7,11 +7,10 @@ use clap::{
 pub enum Shell {
     Zsh,
 }
+
 impl ValueEnum for Shell {
     fn value_variants<'a>() -> &'a [Self] {
-        &[
-            Shell::Zsh,
-        ]
+        &[Shell::Zsh]
     }
 
     fn to_possible_value(&self) -> Option<PossibleValue> {
