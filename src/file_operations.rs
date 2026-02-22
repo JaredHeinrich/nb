@@ -15,6 +15,7 @@ pub trait FileOperations {
     fn create_dir(&mut self, path: &PathBuf) -> Result<()>;
     fn open_file(&mut self, editor_command: &str, path: &PathBuf) -> Result<()>;
     fn exists(&self, path: &PathBuf) -> Result<bool>;
+    fn read_to_string(&self, path: &PathBuf) -> Result<String>;
 }
 
 pub struct FileSystem;
@@ -51,5 +52,8 @@ impl FileOperations for FileSystem {
     }
     fn exists(&self, path: &PathBuf) -> Result<bool> {
         fs::exists(path).map_err(Into::into)
+    }
+    fn read_to_string(&self, path: &PathBuf) -> Result<String> {
+        fs::read_to_string(path).map_err(Into::into)
     }
 }

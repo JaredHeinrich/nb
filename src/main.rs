@@ -13,8 +13,8 @@ mod message;
 mod mock_fs;
 
 fn main() {
-    let config = config::Config::load();
     let fs = FileSystem;
+    let config = config::Config::load_or_default(&fs);
     let mut app = App::new(config, fs);
     let command = cli::build_command();
     let matches = command.get_matches();
