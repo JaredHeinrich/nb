@@ -98,7 +98,12 @@ impl FileOperations for MockFileSystem {
         }
         return Ok(false);
     }
-    fn read_to_string(&self, _path: &PathBuf) -> Result<String> {
+
+    fn read_file(&self, _path: &PathBuf) -> Result<String> {
         Err(anyhow!("Can't read from file in mock file system"))
+    }
+
+    fn write_file(&self, _path: &PathBuf, _value: &str) -> Result<()> {
+        Err(anyhow!("Can't write to file in mock file system"))
     }
 }

@@ -5,7 +5,27 @@ use serde::{Deserialize, Serialize};
 
 use crate::file_operations::FileOperations;
 
-#[derive(Debug, Clone)]
+pub mod value_names {
+    pub const DEFAULT_NOTEBOOK: &'static str = "default_notebook";
+    pub const EDITOR: &'static str = "editor";
+
+    pub const ALL: [&'static str; 2] = [DEFAULT_NOTEBOOK, EDITOR];
+}
+
+fn config_dir() -> PathBuf {
+    let mut path = std::env::home_dir().expect("Could not retrieve home directory");
+    path.push(".config");
+    path
+}
+
+pub fn config_file() -> PathBuf {
+    let mut path = config_dir();
+    path.push("nb");
+    path.push("nb.toml");
+    path
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct Config {
     pub default_notebook: String,
     pub editor: String,
@@ -21,52 +41,50 @@ impl Default for Config {
 }
 
 impl Config {
-    pub fn load_or_default<FS: FileOperations>(fs: &FS) -> Self {
-        let config_file = ConfigFile::load(fs);
+    pub fn build<FS: FileOperations>(fs: &FS) -> Result<Self> {
         let mut config = Self::default();
-        if let Ok(config_file) = config_file {
-            if let Some(default_notebook) = config_file.default_notebook {
-                config.default_notebook = default_notebook;
-            }
-            if let Some(editor) = config_file.editor {
-                config.editor = editor;
-            }
+        config.apply(PartialConfig::from_config_file(fs)?);
+        Ok(config)
+    }
 
+    fn apply(&mut self, partial_config: PartialConfig) {
+        if let Some(default_notebook) = partial_config.default_notebook {
+            self.default_notebook = default_notebook;
         }
-        config
+        if let Some(editor) = partial_config.editor {
+            self.editor = editor;
+        }
     }
 }
 
+impl ToString for Config {
+    fn to_string(&self) -> String {
+        toml::to_string(self).expect("Failed serialization of `Config`")
+        
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ConfigFile {
+pub struct PartialConfig {
     pub default_notebook: Option<String>,
     pub editor: Option<String>,
 }
 
-impl ConfigFile {
-    fn config_dir() -> PathBuf {
-        let mut path = std::env::home_dir().expect("Could not retrieve home directory");
-        path.push(".config");
-        path
+impl Default for PartialConfig {
+    fn default() -> Self {
+        Self {
+            default_notebook: None,
+            editor: None
+        }
     }
+}
 
-    fn config_file() -> PathBuf {
-        let mut path = Self::config_dir();
-        path.push("nb");
-        path.push("nb.toml");
-        path
-    }
-
-    pub fn load<FS: FileOperations>(fs: &FS) -> Result<Self> {
-        let config_file = Self::config_file();
-        let content = fs.read_to_string(&config_file)?;
-        let config: ConfigFile = toml::from_str(&content)?;
-        Ok(config)
-        
-    }
-
-    pub fn write_config() -> Result<()> {
-        todo!("Not yet implemented");
+impl PartialConfig {
+    pub fn from_config_file<FS: FileOperations>(fs: &FS) -> Result<Self> {
+        let config_file_path = config_file();
+        if let Ok(config_toml) = fs.read_file(&config_file_path) {
+            return Ok(toml::from_str(&config_toml)?);
+        }
+        Ok(Self::default())
     }
 }

@@ -13,13 +13,17 @@ mod message;
 mod mock_fs;
 
 fn main() {
+    let result = run();
+    print_result(result);
+}
+
+fn run() -> Result<Message> {
     let fs = FileSystem;
-    let config = config::Config::load_or_default(&fs);
-    let mut app = App::new(config, fs);
+    let config = config::Config::build(&fs)?;
+    let mut app = App::new(config, fs)?;
     let command = cli::build_command();
     let matches = command.get_matches();
-    let result = app.handle_command(matches);
-    print_result(result);
+    app.handle_command(matches)
 }
 
 fn print_result(result: Result<Message>) {

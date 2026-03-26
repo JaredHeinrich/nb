@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, path::PathBuf};
 
 #[derive(Debug)]
 pub enum Message {
@@ -6,6 +6,8 @@ pub enum Message {
     CreatedNoteBook,
     DeletedNoteBook,
     CompletionScript(String),
+    ConfigValues(Vec<(String, String)>),
+    GeneratedConfig(PathBuf),
     EmptyMessage,
 }
 impl Display for Message {
@@ -23,7 +25,15 @@ impl Display for Message {
                 }
                 Ok(())
             }
-            Self::CompletionScript(s) => writeln!(f, "{s}"),
+            Self::CompletionScript(script) => writeln!(f, "{script}"),
+            Self::GeneratedConfig(path) => writeln!(f, "Generated config_file {path:?}"),
+            Self::ConfigValues(config_values) => {
+                let col1_width = config_values.iter().map(|(n, _)| n.len()).max().unwrap_or(0);
+                for (name, value) in config_values {
+                    writeln!(f, "{:<width$} : {}", name, value, width = col1_width)?;
+                }
+                Ok(())
+            }
             Self::EmptyMessage => write!(f, ""),
         }
     }

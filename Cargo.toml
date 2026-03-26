@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 clap = {version="4.5", features=["string"]}
-confy = {version="2.0"}
 dirs = {version="6.0"}
 serde = {version="1.0", features=["derive"]}
 toml = {version="1.0"}
