@@ -1,5 +1,6 @@
 use clap::{
-    Arg, ArgAction, Command, ValueEnum, builder::{EnumValueParser, PossibleValue}
+    builder::{EnumValueParser, PossibleValue},
+    Arg, ArgAction, Command, ValueEnum,
 };
 
 #[derive(Clone, PartialEq, Debug)]
@@ -76,8 +77,8 @@ pub fn build_command() -> Command {
                                 .long("force")
                                 .short('f')
                                 .action(ArgAction::SetTrue)
-                                .help("Overwrite the config file if one already exists")
-                        )
+                                .help("Overwrite the config file if one already exists"),
+                        ),
                 )
                 .subcommand(
                     Command::new("get")
@@ -88,14 +89,10 @@ pub fn build_command() -> Command {
                                 .value_name("VALUE_NAME")
                                 .num_args(1..)
                                 .required(true)
-                                .help("Values to get from the config")
-
-                        )
+                                .help("Values to get from the config"),
+                        ),
                 )
-                .subcommand(
-                    Command::new("list")
-                        .about("List all config values")
-                )
+                .subcommand(Command::new("list").about("List all config values")),
         )
         .subcommand(
             Command::new("completions")

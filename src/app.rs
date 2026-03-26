@@ -6,8 +6,8 @@ use anyhow::Result;
 use clap::ArgMatches;
 
 use crate::cli::Shell;
-use crate::config::{Config, PartialConfig};
 use crate::config;
+use crate::config::{Config, PartialConfig};
 use crate::error::AppError;
 use crate::file_operations::FileOperations;
 use crate::message::Message;
@@ -183,22 +183,22 @@ impl<FS: FileOperations> App<FS> {
                 let shell = sub_matches.get_one::<Shell>(arg::SHELL).unwrap();
                 self.get_completion_script(shell)
             }
-            Some((cmd::CONFIG, sub_matches)) => {
-                match sub_matches.subcommand() {
-                    Some((cmd::CONFIG_GENERATE, sub_matches)) => {
-                        let force = sub_matches.get_flag(arg::FORCE);
-                        self.generate_config(force)
-                    }
-                    Some((cmd::CONFIG_GET, sub_matches)) => {
-                        let values: Vec<String> = sub_matches.get_many(arg::VALUE_NAME).unwrap().cloned().collect();
-                        self.config_values(&values)
-                    }
-                    Some((cmd::CONFIG_LIST, _sub_matches)) => {
-                        self.all_config_values()
-                    }
-                    _ => Err(AppError::CommandNotHandled)?,
+            Some((cmd::CONFIG, sub_matches)) => match sub_matches.subcommand() {
+                Some((cmd::CONFIG_GENERATE, sub_matches)) => {
+                    let force = sub_matches.get_flag(arg::FORCE);
+                    self.generate_config(force)
                 }
-            }
+                Some((cmd::CONFIG_GET, sub_matches)) => {
+                    let values: Vec<String> = sub_matches
+                        .get_many(arg::VALUE_NAME)
+                        .unwrap()
+                        .cloned()
+                        .collect();
+                    self.config_values(&values)
+                }
+                Some((cmd::CONFIG_LIST, _sub_matches)) => self.all_config_values(),
+                _ => Err(AppError::CommandNotHandled)?,
+            },
             _ => Err(AppError::CommandNotHandled)?,
         }
     }

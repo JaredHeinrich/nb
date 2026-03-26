@@ -21,7 +21,6 @@ pub trait FileOperations {
 
 pub struct FileSystem;
 impl FileOperations for FileSystem {
-
     fn get_files(&self, dir: &PathBuf) -> Result<Vec<String>> {
         let files: Vec<String> = fs::read_dir(dir)?
             .map(|file| file.unwrap().file_name().into_string().unwrap())

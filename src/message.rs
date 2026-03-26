@@ -28,7 +28,11 @@ impl Display for Message {
             Self::CompletionScript(script) => writeln!(f, "{script}"),
             Self::GeneratedConfig(path) => writeln!(f, "Generated config_file {path:?}"),
             Self::ConfigValues(config_values) => {
-                let col1_width = config_values.iter().map(|(n, _)| n.len()).max().unwrap_or(0);
+                let col1_width = config_values
+                    .iter()
+                    .map(|(n, _)| n.len())
+                    .max()
+                    .unwrap_or(0);
                 for (name, value) in config_values {
                     writeln!(f, "{:<width$} : {}", name, value, width = col1_width)?;
                 }
