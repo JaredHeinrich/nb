@@ -60,7 +60,6 @@ impl Config {
 impl ToString for Config {
     fn to_string(&self) -> String {
         toml::to_string(self).expect("Failed serialization of `Config`")
-        
     }
 }
 
@@ -74,7 +73,7 @@ impl Default for PartialConfig {
     fn default() -> Self {
         Self {
             default_notebook: None,
-            editor: None
+            editor: None,
         }
     }
 }
