@@ -1,3 +1,4 @@
+use clap::CommandFactory;
 use clap_complete::aot::Zsh;
 use clap_complete::generate_to;
 use std::env;
@@ -10,7 +11,7 @@ fn main() -> Result<(), Error> {
         None => return Ok(()),
         Some(outdir) => outdir,
     };
-    let mut cmd = build_command();
+    let mut cmd = Cli::command();
     let path = generate_to(Zsh, &mut cmd, "nb", &outdir)?;
     println!("cargo:warning=completion file is generated: {path:?}");
     Ok(())

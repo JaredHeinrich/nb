@@ -1,7 +1,8 @@
 use anyhow::Result;
 use app::App;
+use clap::Parser;
 
-use crate::{file_operations::FileSystem, message::Message};
+use crate::{cli::Cli, file_operations::FileSystem, message::Message};
 
 mod app;
 mod cli;
@@ -9,6 +10,7 @@ mod config;
 mod error;
 mod file_operations;
 mod message;
+
 #[cfg(test)]
 mod mock_fs;
 
@@ -21,9 +23,8 @@ fn run() -> Result<Message> {
     let fs = FileSystem;
     let config = config::Config::build(&fs)?;
     let mut app = App::new(config, fs)?;
-    let command = cli::build_command();
-    let matches = command.get_matches();
-    app.handle_command(matches)
+    let command = Cli::parse();
+    app.handle_command(command)
 }
 
 fn print_result(result: Result<Message>) {
