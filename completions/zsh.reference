@@ -1,0 +1,191 @@
+#compdef nb
+
+autoload -U is-at-least
+
+_nb() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+":: :_nb_commands" \
+"*::: :->nb" \
+&& ret=0
+    case $state in
+    (nb)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:nb-command-$line[1]:"
+        case $line[1] in
+            (new)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Name of the note book to be created.:_default' \
+&& ret=0
+;;
+(open)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'::name -- Name of the note book to open.:_default' \
+&& ret=0
+;;
+(remove)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Name of the note book to be deleted.:_default' \
+&& ret=0
+;;
+(rm)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Name of the note book to be deleted.:_default' \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(ls)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(config)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_nb__config_commands" \
+"*::: :->config" \
+&& ret=0
+
+    case $state in
+    (config)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:nb-config-command-$line[1]:"
+        case $line[1] in
+            (generate)
+_arguments "${_arguments_options[@]}" : \
+'-f[Overwrite the config file if one already exists]' \
+'--force[Overwrite the config file if one already exists]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(get)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+'*::value_name -- Values to get from the config:_default' \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(completions)
+_arguments "${_arguments_options[@]}" : \
+'-s+[Shell for which to return the completion script]:SHELL:(zsh)' \
+'--shell=[Shell for which to return the completion script]:SHELL:(zsh)' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_nb_commands] )) ||
+_nb_commands() {
+    local commands; commands=(
+'new:Create a new note book' \
+'open:Open a note book' \
+'remove:Delete a note book' \
+'rm:Delete a note book' \
+'list:List existing note books' \
+'ls:List existing note books' \
+'config:Access config via cli' \
+'completions:Completion script for specific shell' \
+    )
+    _describe -t commands 'nb commands' commands "$@"
+}
+(( $+functions[_nb__completions_commands] )) ||
+_nb__completions_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb completions commands' commands "$@"
+}
+(( $+functions[_nb__config_commands] )) ||
+_nb__config_commands() {
+    local commands; commands=(
+'generate:Generate a default config file' \
+'get:Get specific config values' \
+'list:List all config values' \
+    )
+    _describe -t commands 'nb config commands' commands "$@"
+}
+(( $+functions[_nb__config__generate_commands] )) ||
+_nb__config__generate_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb config generate commands' commands "$@"
+}
+(( $+functions[_nb__config__get_commands] )) ||
+_nb__config__get_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb config get commands' commands "$@"
+}
+(( $+functions[_nb__config__list_commands] )) ||
+_nb__config__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb config list commands' commands "$@"
+}
+(( $+functions[_nb__list_commands] )) ||
+_nb__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb list commands' commands "$@"
+}
+(( $+functions[_nb__new_commands] )) ||
+_nb__new_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb new commands' commands "$@"
+}
+(( $+functions[_nb__open_commands] )) ||
+_nb__open_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb open commands' commands "$@"
+}
+(( $+functions[_nb__remove_commands] )) ||
+_nb__remove_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb remove commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_nb" ]; then
+    _nb "$@"
+else
+    compdef _nb nb
+fi

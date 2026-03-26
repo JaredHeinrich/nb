@@ -3,55 +3,121 @@
 NB_ROOT_DIR="$HOME/.notebooks"
 
 _nb() {
-    local state line
-    _arguments -C \
-        '--help[Print help]' \
-        '--version[Print version]' \
-        "1:subcommand:_nb_subcommands" \
-        "*::arg:->args"
-    case $line[1] in
+  typeset -A opt_args
+  local context state line
+  local curcontext="$curcontext"
+  local ret=1
+
+  _arguments -C -A "-*" \
+    '(- *)--version[Print version]' \
+    '(- *)'{-h,--help}'[Print help]' \
+    '1: :_nb_subcommands' \
+    '*::arg:->args' \
+    && ret=0
+
+  case "$state" in
+    (args)
+      case $words[1] in
         (new)
-            _arguments \
-                ':name -- Name of the note book to be created.:_default' \
-            ;;
+          _arguments \
+            ':name -- Name of the note book to be created.:' \
+            && ret=0
+          ;;
         (open)
-            _arguments \
-                '::name -- Name of the note book to open.:_nb_notebooks' \
-            ;;
+          _arguments \
+            '::name -- Name of the note book to open.:_notebooks' \
+            && ret=0
+          ;;
         (remove)
-            _arguments \
-                ':name -- Name of the note book to be deleted.:_nb_notebooks' \
-            ;;
+          _arguments \
+            ':name -- Name of the note book to be deleted.:_notebooks' \
+            && ret=0
+          ;;
         (rm)
-            _arguments \
-                ':name -- Name of the note book to be deleted.:_nb_notebooks' \
-            ;;
+          _arguments \
+            ':name -- Name of the note book to be deleted.:_notebooks' \
+            && ret=0
+          ;;
+        (list)
+          ret=0
+          ;;
         (completions)
+          _arguments \
+            '--shell+[Shell for which to return the completion script]:SHELL:(zsh)' \
+            && ret=0
+          ;;
+        (config)
+          _nb_config && ret=0
+          ;;
+      esac
+      ;;
+  esac
+
+  return ret
+}
+
+(( $+functions[_nb_subcommands] )) ||
+  _nb_subcommands() {
+    local -a commands=(
+      "new:Create a new note book"
+      "open:Open a note book"
+      "remove:Delete a note book"
+      "list:List existing note books"
+      "config:Access config via cli"
+      "completions:Completion script for specific shell"
+    )
+    _describe -t commands 'nb commands' commands "$@"
+  }
+
+(( $+functions[_nb_config_subcommands] )) ||
+  _nb_config_subcommands() {
+    local -a commands=(
+      "generate:Generate a default config file"
+      "get:Get specific config values"
+      "list:List all config values"
+    )
+    _describe -t commands 'command' commands "$@"
+  }
+
+(( $+functions[_nb_config] )) ||
+  _nb_config() {
+    local ret=1
+    _arguments -C \
+      '1: :_nb_config_subcommands' \
+      '*:: :->arg' \
+      && ret=0
+    case $state in
+      (arg)
+        case $words[1] in
+          (generate)
             _arguments \
-                '--shell+[Shell for which to return the completion script]:SHELL:(zsh)' \
+              '(-f --force)'{-f,--force}'[Overwrite the config file if one already exists]' \
+              && ret=0
             ;;
+          (get)
+            _arguments \
+              '*::value_name:(default_notebook editor)' \
+              && ret=0
+            ;;
+          (list)
+            ret=0
+            ;;
+        esac
+        ;;
     esac
-}
+    return $ret
+  }
 
-_nb_subcommands() {
-    local commands; commands=(
-        'new:Create a new note book' \
-            'open:Open a note book' \
-            'remove:Delete a note book' \
-            'list:List existing note books' \
-            'completions:Completion script for specific shell' \
-        )
-        _describe -t commands 'nb commands' commands "$@"
-    }
+(( $+functions[_notebooks] )) ||
+  _notebooks() {
+    [[ -d $NB_ROOT_DIR ]] || return 1
 
-_nb_notebooks() {
-  [[ -d $NB_ROOT_DIR ]] || return 1
+    local -a file_paths
+    file_paths=($NB_ROOT_DIR/*(N))
 
-  local -a file_paths
-  file_paths=($NB_ROOT_DIR/*(N))
+    local -a file_names
+    file_names=(${file_paths:t})
+    _describe 'notebook' file_names
+  }
 
-  local -a file_names
-  file_names=(${file_paths:t})
-  _describe 'notebook' file_names
-  # compadd -Q -a files
-}
+# vim: ft=zsh sw=2 ts=2 et

@@ -15,11 +15,13 @@ pub trait FileOperations {
     fn create_dir(&mut self, path: &PathBuf) -> Result<()>;
     fn open_file(&mut self, editor_command: &str, path: &PathBuf) -> Result<()>;
     fn exists(&self, path: &PathBuf) -> Result<bool>;
-    fn read_to_string(&self, path: &PathBuf) -> Result<String>;
+    fn read_file(&self, path: &PathBuf) -> Result<String>;
+    fn write_file(&self, path: &PathBuf, value: &str) -> Result<()>;
 }
 
 pub struct FileSystem;
 impl FileOperations for FileSystem {
+
     fn get_files(&self, dir: &PathBuf) -> Result<Vec<String>> {
         let files: Vec<String> = fs::read_dir(dir)?
             .map(|file| file.unwrap().file_name().into_string().unwrap())
@@ -50,10 +52,19 @@ impl FileOperations for FileSystem {
             .map(|_| ())
             .map_err(|e| e.into())
     }
+
     fn exists(&self, path: &PathBuf) -> Result<bool> {
         fs::exists(path).map_err(Into::into)
     }
-    fn read_to_string(&self, path: &PathBuf) -> Result<String> {
+
+    fn read_file(&self, path: &PathBuf) -> Result<String> {
         fs::read_to_string(path).map_err(Into::into)
+    }
+
+    fn write_file(&self, file_path: &PathBuf, content: &str) -> Result<()> {
+        let mut dir_path = file_path.clone();
+        dir_path.pop();
+        fs::create_dir_all(dir_path)?;
+        fs::write(file_path, content).map_err(Into::into)
     }
 }

@@ -1,6 +1,5 @@
 use clap::{
-    builder::{EnumValueParser, PossibleValue},
-    Arg, Command, ValueEnum,
+    Arg, ArgAction, Command, ValueEnum, builder::{EnumValueParser, PossibleValue}
 };
 
 #[derive(Clone, PartialEq, Debug)]
@@ -66,6 +65,39 @@ pub fn build_command() -> Command {
                 .about("List existing note books"),
         )
         .subcommand(
+            Command::new("config")
+                .about("Access config via cli")
+                .subcommand_required(true)
+                .subcommand(
+                    Command::new("generate")
+                        .about("Generate a default config file")
+                        .arg(
+                            Arg::new("force")
+                                .long("force")
+                                .short('f')
+                                .action(ArgAction::SetTrue)
+                                .help("Overwrite the config file if one already exists")
+                        )
+                )
+                .subcommand(
+                    Command::new("get")
+                        .about("Get specific config values")
+                        .arg_required_else_help(true)
+                        .arg(
+                            Arg::new("value_name")
+                                .value_name("VALUE_NAME")
+                                .num_args(1..)
+                                .required(true)
+                                .help("Values to get from the config")
+
+                        )
+                )
+                .subcommand(
+                    Command::new("list")
+                        .about("List all config values")
+                )
+        )
+        .subcommand(
             Command::new("completions")
                 .about("Completion script for specific shell")
                 .arg(
@@ -75,7 +107,6 @@ pub fn build_command() -> Command {
                         .value_name("SHELL")
                         .value_parser(EnumValueParser::<Shell>::new())
                         .help("Shell for which to return the completion script")
-                        .action(clap::ArgAction::Set)
                         .required(true),
                 ),
         )

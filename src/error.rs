@@ -8,6 +8,8 @@ pub enum AppError {
     NotFound,
     CommandNotHandled,
     EditorNotInstalled(String),
+    ConfigAlreadyExists(PathBuf),
+    NoHomeDir,
 }
 impl Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -18,6 +20,11 @@ impl Display for AppError {
             Self::EditorNotInstalled(editor) => {
                 writeln!(f, "The configured editor \"{editor}\" is not installed.")
             }
+            Self::ConfigAlreadyExists(path) => {
+                writeln!(f, "A config file already exists {path:?}.")?;
+                writeln!(f, "To overwrite it with the default use --force.")
+            }
+            Self::NoHomeDir => writeln!(f, "No home directory could be found"),
         }
     }
 }
