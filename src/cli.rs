@@ -1,112 +1,110 @@
-use clap::{
-    builder::{EnumValueParser, PossibleValue},
-    Arg, ArgAction, Command, ValueEnum,
-};
+use clap::Subcommand as ClapSubcommand;
+use clap::{Args, Parser, ValueEnum};
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Parser)]
+#[command(version = "0.1.0")]
+#[command(about = "CLI note book manager")]
+#[command(disable_help_subcommand = true)]
+#[command(flatten_help = true)]
+pub struct Cli {
+    #[command(subcommand)]
+    pub subcommand: Subcommand,
+}
+
+#[derive(ClapSubcommand)]
+pub enum Subcommand {
+    #[command(about = "Create a new note book")]
+    New(NewArgs),
+
+    #[command(about = "Open a note book")]
+    Open(OpenArgs),
+
+    #[command(about = "Delete a note book")]
+    #[clap(alias = "rm")]
+    Remove(RemoveArgs),
+
+    #[command(about = "List existing note books")]
+    #[clap(alias = "ls")]
+    List,
+
+    #[command(about = "Access config via cli")]
+    Config(ConfigArgs),
+
+    #[command(about = "Completion script for specific shell")]
+    Completions(CompletionArgs),
+}
+
+#[derive(Args)]
+pub struct NewArgs {
+    #[arg(help = "Name of the note book to be created.")]
+    #[arg(value_parser=non_empty_trimmed)]
+    pub name: String,
+}
+
+#[derive(Args)]
+pub struct OpenArgs {
+    #[arg(help = "Name of the note book to open.")]
+    pub name: Option<String>,
+}
+
+#[derive(Args)]
+pub struct RemoveArgs {
+    #[arg(help = "Name of the note book to be deleted.")]
+    pub name: String,
+}
+
+#[derive(Args)]
+pub struct ConfigArgs {
+    #[command(subcommand)]
+    pub subcommand: ConfigSubcommand,
+}
+
+#[derive(ClapSubcommand)]
+pub enum ConfigSubcommand {
+    #[command(about = "Generate a default config file")]
+    Generate(ConfigGenerateArgs),
+
+    #[command(about = "Get specific config values")]
+    Get(ConfigGetArgs),
+
+    #[command(about = "List all config values")]
+    List,
+}
+
+#[derive(Args)]
+pub struct ConfigGenerateArgs {
+    #[arg(help = "Overwrite the config file if one already exists")]
+    #[arg(short, long)]
+    pub force: bool,
+}
+
+#[derive(Args)]
+pub struct ConfigGetArgs {
+    #[arg(help = "Values to get from the config")]
+    #[arg(value_name = "VALUE_NAME")]
+    #[arg(required = true)]
+    pub value_names: Vec<String>,
+}
+
+#[derive(Args)]
+pub struct CompletionArgs {
+    #[arg(help = "Shell for which to return the completion script")]
+    #[arg(short, long)]
+    pub shell: Shell,
+}
+
+#[derive(ValueEnum, Clone, PartialEq, Debug)]
 pub enum Shell {
     Zsh,
 }
 
-impl ValueEnum for Shell {
-    fn value_variants<'a>() -> &'a [Self] {
-        &[Shell::Zsh]
+fn non_empty_trimmed(s: &str) -> Result<String, String> {
+    let trimmed = s.trim();
+    if trimmed.is_empty() {
+        Err("Name must not be empty".to_string())
+    } else {
+        Ok(trimmed.to_string())
     }
-
-    fn to_possible_value(&self) -> Option<PossibleValue> {
-        Some(match self {
-            Shell::Zsh => PossibleValue::new("zsh"),
-        })
-    }
-}
-
-pub fn build_command() -> Command {
-    Command::new("nb")
-        .version("0.1.0")
-        .about("CLI note book manager")
-        .subcommand_required(true)
-        .flatten_help(true)
-        .disable_help_subcommand(true)
-        .subcommand(
-            Command::new("new").about("Create a new note book").arg(
-                Arg::new("name")
-                    .value_name("NAME")
-                    .value_parser(|s: &str| {
-                        let trimmed = s.trim();
-                        if trimmed.is_empty() {
-                            return Err("Name must not be empty".to_string());
-                        }
-                        Ok(trimmed.to_string())
-                    })
-                    .help("Name of the note book to be created.")
-                    .required(true),
-            ),
-        )
-        .subcommand(
-            Command::new("open").about("Open a note book").arg(
-                Arg::new("name")
-                    .value_name("NAME")
-                    .help("Name of the note book to open."),
-            ),
-        )
-        .subcommand(
-            Command::new("remove")
-                .visible_alias("rm")
-                .about("Delete a note book")
-                .arg(
-                    Arg::new("name")
-                        .value_name("NAME")
-                        .help("Name of the note book to be deleted.")
-                        .required(true),
-                ),
-        )
-        .subcommand(
-            Command::new("list")
-                .visible_alias("ls")
-                .about("List existing note books"),
-        )
-        .subcommand(
-            Command::new("config")
-                .about("Access config via cli")
-                .subcommand_required(true)
-                .subcommand(
-                    Command::new("generate")
-                        .about("Generate a default config file")
-                        .arg(
-                            Arg::new("force")
-                                .long("force")
-                                .short('f')
-                                .action(ArgAction::SetTrue)
-                                .help("Overwrite the config file if one already exists"),
-                        ),
-                )
-                .subcommand(
-                    Command::new("get")
-                        .about("Get specific config values")
-                        .arg_required_else_help(true)
-                        .arg(
-                            Arg::new("value_name")
-                                .value_name("VALUE_NAME")
-                                .num_args(1..)
-                                .required(true)
-                                .help("Values to get from the config"),
-                        ),
-                )
-                .subcommand(Command::new("list").about("List all config values")),
-        )
-        .subcommand(
-            Command::new("completions")
-                .about("Completion script for specific shell")
-                .arg(
-                    Arg::new("shell")
-                        .short('s')
-                        .long("shell")
-                        .value_name("SHELL")
-                        .value_parser(EnumValueParser::<Shell>::new())
-                        .help("Shell for which to return the completion script")
-                        .required(true),
-                ),
-        )
 }
 
 #[cfg(test)]
@@ -115,106 +113,149 @@ mod tests {
 
     #[test]
     fn test_nb_no_subcommand() {
-        let cmd = build_command();
-        assert!(cmd.try_get_matches_from(["nb"]).is_err());
+        assert!(Cli::try_parse_from(["nb"]).is_err());
     }
 
     #[test]
     fn test_nb_invalid_subcommands() {
-        let cmd = build_command();
-        assert!(cmd.clone().try_get_matches_from(["nb", " "]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "test"]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "-t"]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "--test"]).is_err());
+        assert!(Cli::try_parse_from(["nb", " "]).is_err());
+        assert!(Cli::try_parse_from(["nb", "test"]).is_err());
+        assert!(Cli::try_parse_from(["nb", "-t"]).is_err());
+        assert!(Cli::try_parse_from(["nb", "--test"]).is_err());
     }
 
     #[test]
     fn test_new_no_name() {
-        let cmd = build_command();
-        assert!(cmd.clone().try_get_matches_from(["nb", "new"]).is_err());
-        assert!(cmd.clone().try_get_matches_from(["nb", "new", ""]).is_err());
-        assert!(cmd
-            .clone()
-            .try_get_matches_from(["nb", "new", " "])
-            .is_err());
-        assert!(cmd
-            .clone()
-            .try_get_matches_from(["nb", "new", "\r"])
-            .is_err());
-        assert!(cmd
-            .clone()
-            .try_get_matches_from(["nb", "new", "\n"])
-            .is_err());
-        assert!(cmd
-            .clone()
-            .try_get_matches_from(["nb", "new", "\t"])
-            .is_err());
+        assert!(Cli::try_parse_from(["nb", "new"]).is_err());
+        assert!(Cli::try_parse_from(["nb", "new", ""]).is_err());
+        assert!(Cli::try_parse_from(["nb", "new", " "]).is_err());
+        assert!(Cli::try_parse_from(["nb", "new", "\r"]).is_err());
+        assert!(Cli::try_parse_from(["nb", "new", "\n"]).is_err());
+        assert!(Cli::try_parse_from(["nb", "new", "\t"]).is_err());
     }
 
     #[test]
     fn test_new_multiple_names() {
-        let cmd = build_command();
-        assert!(cmd.try_get_matches_from(["nb", "new", "a", "b"]).is_err());
+        assert!(Cli::try_parse_from(["nb", "new", "a", "b"]).is_err());
     }
 
     #[test]
     fn test_new() {
-        let cmd = build_command();
-        let matches = cmd.clone().get_matches_from(["nb", "new", "my_notebook"]);
-        assert!(matches.try_get_one::<String>("name").is_err());
-        let (subcommand, matches) = matches.subcommand().unwrap();
-        assert_eq!(subcommand, "new");
-        assert_eq!(matches.get_one::<String>("name").unwrap(), "my_notebook");
+        let cli = Cli::parse_from(["nb", "new", "my_notebook"]);
+        let Subcommand::New(args) = cli.subcommand else {
+            panic!()
+        };
+        assert_eq!(args.name, "my_notebook");
     }
 
     #[test]
     fn test_open_multiple_names() {
-        let cmd = build_command();
-        assert!(cmd.try_get_matches_from(["nb", "open", "a", "b"]).is_err());
+        assert!(Cli::try_parse_from(["nb", "open", "a", "b"]).is_err());
     }
 
     #[test]
     fn test_open() {
-        let cmd = build_command();
-        let matches = cmd
-            .clone()
-            .try_get_matches_from(["nb", "open", "my_notebook"])
-            .unwrap();
-        assert!(matches.try_get_one::<String>("name").is_err());
-        let (subcommand, matches) = matches.subcommand().unwrap();
-        assert_eq!(subcommand, "open");
-        assert_eq!(matches.get_one::<String>("name").unwrap(), "my_notebook");
+        let cli = Cli::parse_from(["nb", "open", "my_notebook"]);
+        let Subcommand::Open(args) = cli.subcommand else {
+            panic!()
+        };
+        assert_eq!(args.name.as_deref(), Some("my_notebook"));
     }
 
     #[test]
     fn test_completions_no_shell() {
-        let cmd = build_command();
-        assert!(cmd.try_get_matches_from(["nb", "completions"]).is_err());
+        assert!(Cli::try_parse_from(["nb", "completions"]).is_err());
     }
 
     #[test]
     fn test_completions_no_argument_name() {
-        let cmd = build_command();
-        assert!(cmd
-            .try_get_matches_from(["nb", "completions", "zsh"])
-            .is_err());
+        assert!(Cli::try_parse_from(["nb", "completions", "zsh"]).is_err());
     }
 
     #[test]
     fn test_completions() {
-        let cmd = build_command();
-        let matches = cmd
-            .clone()
-            .get_matches_from(["nb", "completions", "-s", "zsh"]);
-        let (subcommand, matches) = matches.subcommand().unwrap();
-        assert_eq!(subcommand, "completions");
-        assert_eq!(*matches.get_one::<Shell>("shell").unwrap(), Shell::Zsh);
+        let cli = Cli::parse_from(["nb", "completions", "-s", "zsh"]);
+        let Subcommand::Completions(args) = cli.subcommand else {
+            panic!()
+        };
+        assert_eq!(args.shell, Shell::Zsh);
 
-        let matches = cmd
-            .clone()
-            .get_matches_from(["nb", "completions", "--shell", "zsh"]);
-        let (subcommand, matches) = matches.subcommand().unwrap();
-        assert_eq!(subcommand, "completions");
-        assert_eq!(*matches.get_one::<Shell>("shell").unwrap(), Shell::Zsh);
+        let cli = Cli::parse_from(["nb", "completions", "--shell", "zsh"]);
+        let Subcommand::Completions(args) = cli.subcommand else {
+            panic!()
+        };
+        assert_eq!(args.shell, Shell::Zsh);
+    }
+
+    #[test]
+    fn test_config_wrong_subcommand() {
+        assert!(Cli::try_parse_from(["nb", "config"]).is_err());
+        assert!(Cli::try_parse_from(["nb", "config", "test"]).is_err());
+    }
+
+    #[test]
+    fn test_config_generate() {
+        assert!(Cli::try_parse_from(["nb", "config", "generate", "--test"]).is_err());
+
+        let cli = Cli::parse_from(["nb", "config", "generate"]);
+        let Subcommand::Config(config_args) = cli.subcommand else {
+            panic!()
+        };
+        let ConfigSubcommand::Generate(generate_args) = config_args.subcommand else {
+            panic!()
+        };
+        assert!(!generate_args.force);
+
+        let cli = Cli::parse_from(["nb", "config", "generate", "--force"]);
+        let Subcommand::Config(config_args) = cli.subcommand else {
+            panic!()
+        };
+        let ConfigSubcommand::Generate(generate_args) = config_args.subcommand else {
+            panic!()
+        };
+        assert!(generate_args.force);
+
+        let cli = Cli::parse_from(["nb", "config", "generate", "-f"]);
+        let Subcommand::Config(config_args) = cli.subcommand else {
+            panic!()
+        };
+        let ConfigSubcommand::Generate(generate_args) = config_args.subcommand else {
+            panic!()
+        };
+        assert!(generate_args.force);
+    }
+
+    #[test]
+    fn test_config_get() {
+        assert!(Cli::try_parse_from(["nb", "config", "get"]).is_err());
+
+        let cli = Cli::parse_from(["nb", "config", "get", "value_name"]);
+        let Subcommand::Config(config_args) = cli.subcommand else {
+            panic!()
+        };
+        let ConfigSubcommand::Get(get_args) = config_args.subcommand else {
+            panic!()
+        };
+        assert_eq!(get_args.value_names, ["value_name"]);
+
+        let cli = Cli::parse_from(["nb", "config", "get", "value_name_1", "value_name_2"]);
+        let Subcommand::Config(config_args) = cli.subcommand else {
+            panic!()
+        };
+        let ConfigSubcommand::Get(get_args) = config_args.subcommand else {
+            panic!()
+        };
+        assert_eq!(get_args.value_names, ["value_name_1", "value_name_2"]);
+    }
+
+    #[test]
+    fn test_config_list() {
+        assert!(Cli::try_parse_from(["nb", "config", "list", "test"]).is_err());
+
+        let cli = Cli::parse_from(["nb", "config", "list"]);
+        let Subcommand::Config(config_args) = cli.subcommand else {
+            panic!()
+        };
+        assert!(matches!(config_args.subcommand, ConfigSubcommand::List));
     }
 }

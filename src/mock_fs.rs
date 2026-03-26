@@ -17,12 +17,14 @@ fn extract_file_name(root_dir_path: &PathBuf, file_path: &PathBuf) -> Result<Str
     Ok(file_name)
 }
 
+#[allow(unused)]
 pub struct MockFileSystem {
     opened_files: Vec<PathBuf>,
     notebook_root_dir: PathBuf,
     files: Vec<String>,
 }
 
+#[allow(unused)]
 impl MockFileSystem {
     pub fn new(notebook_root_dir: PathBuf, notebooks: Vec<String>) -> Self {
         Self {

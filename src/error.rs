@@ -6,7 +6,6 @@ use thiserror::Error;
 pub enum AppError {
     AlreadyExists,
     NotFound,
-    CommandNotHandled,
     EditorNotInstalled(String),
     ConfigAlreadyExists(PathBuf),
     NoHomeDir,
@@ -16,7 +15,6 @@ impl Display for AppError {
         match self {
             Self::AlreadyExists => writeln!(f, "The note book already exists."),
             Self::NotFound => writeln!(f, "The note book does not exists."),
-            Self::CommandNotHandled => writeln!(f, "Internal Error: Command not handled."),
             Self::EditorNotInstalled(editor) => {
                 writeln!(f, "The configured editor \"{editor}\" is not installed.")
             }

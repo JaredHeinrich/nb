@@ -2,10 +2,12 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::Stdio;
 
-use anyhow::Result;
-use clap::ArgMatches;
+use anyhow::{Ok, Result};
 
-use crate::cli::Shell;
+use crate::cli::{
+    Cli, CompletionArgs, ConfigArgs, ConfigGenerateArgs, ConfigGetArgs, ConfigSubcommand, NewArgs,
+    OpenArgs, RemoveArgs, Shell, Subcommand,
+};
 use crate::config;
 use crate::config::{Config, PartialConfig};
 use crate::error::AppError;
@@ -13,25 +15,6 @@ use crate::file_operations::FileOperations;
 use crate::message::Message;
 
 const NB_ROOT_DIR: &'static str = ".notebooks";
-
-mod cmd {
-    pub const NEW: &str = "new";
-    pub const OPEN: &str = "open";
-    pub const REMOVE: &str = "remove";
-    pub const LIST: &str = "list";
-    pub const COMPLETIONS: &str = "completions";
-    pub const CONFIG: &str = "config";
-    pub const CONFIG_GENERATE: &str = "generate";
-    pub const CONFIG_LIST: &str = "list";
-    pub const CONFIG_GET: &str = "get";
-}
-
-mod arg {
-    pub const NAME: &str = "name";
-    pub const SHELL: &str = "shell";
-    pub const VALUE_NAME: &str = "value_name";
-    pub const FORCE: &str = "force";
-}
 
 pub struct App<FS: FileOperations> {
     pub config: config::Config,
@@ -79,67 +62,12 @@ impl<FS: FileOperations> App<FS> {
         Ok(())
     }
 
-    fn create_notebook(&mut self, name: &str) -> Result<Message> {
-        let mut nb_path = self.nb_root_dir.clone();
-        nb_path.push(&name);
-        if fs::exists(&nb_path)? {
-            Err(AppError::AlreadyExists)?;
-        }
-        self.fs.create_file(&nb_path)?;
-        Ok(Message::CreatedNoteBook)
-    }
-
-    fn delete_node_book(&mut self, name: &str) -> Result<Message> {
-        let mut nb_path = self.nb_root_dir.clone();
-        nb_path.push(&name);
-        if !fs::exists(&nb_path)? {
-            Err(AppError::NotFound)?;
-        }
-        self.fs.delete_file(&nb_path)?;
-        Ok(Message::DeletedNoteBook)
-    }
-
-    pub fn list_notebooks(&self) -> Result<Message> {
-        let files = self.fs.get_files(&self.nb_root_dir)?;
-        Ok(Message::ListOfNoteBooks(files))
-    }
-
-    fn open_notebook(&mut self, name: &str) -> Result<Message> {
-        let mut notebook_path = self.nb_root_dir.to_owned();
-        notebook_path.push(&name);
-        if !fs::exists(&notebook_path)? {
-            Err(AppError::NotFound)?;
-        }
-        self.fs.open_file(&self.config.editor, &notebook_path)?;
-        Ok(Message::EmptyMessage)
-    }
-
-    fn get_completion_script(&self, shell: &Shell) -> Result<Message> {
-        match shell {
-            Shell::Zsh => Ok(Message::CompletionScript(
-                include_str!("../completions/_nb").to_owned(),
-            )),
-        }
-    }
-
-    fn generate_config(&self, force: bool) -> Result<Message> {
-        let config_file_path = config::config_file();
-        let config_exists = self.fs.exists(&config_file_path)?;
-        if config_exists && !force {
-            return Err(AppError::ConfigAlreadyExists(config_file_path).into());
-        }
-        let config = Config::default();
-        let config_string = config.to_string();
-        self.fs.write_file(&config_file_path, &config_string)?;
-        Ok(Message::GeneratedConfig(config_file_path))
-    }
-
-    fn config_values<T: AsRef<str>>(&self, value_names: &[T]) -> Result<Message> {
+    fn get_config_values<T: AsRef<str>>(&self, value_names: &[T]) -> Result<Vec<(String, String)>> {
         let mut config_values: Vec<(String, String)> = Vec::new();
         let config_file_path = config::config_file();
         let config_exists = self.fs.exists(&config_file_path)?;
         if !config_exists {
-            return Ok(Message::ConfigValues(config_values));
+            return Ok(config_values);
         }
         let config = PartialConfig::from_config_file(&self.fs)?;
         for value_name in value_names {
@@ -153,53 +81,98 @@ impl<FS: FileOperations> App<FS> {
                 config_values.push((value_name.to_owned(), value.to_owned()));
             }
         }
-        Ok(Message::ConfigValues(config_values))
+        Ok(config_values)
     }
 
-    fn all_config_values(&self) -> Result<Message> {
-        self.config_values(&config::value_names::ALL)
+    fn handle_new(&mut self, args: NewArgs) -> Result<Message> {
+        let mut nb_path = self.nb_root_dir.clone();
+        nb_path.push(&args.name);
+        if fs::exists(&nb_path)? {
+            Err(AppError::AlreadyExists)?;
+        }
+        self.fs.create_file(&nb_path)?;
+        Ok(Message::CreatedNoteBook)
     }
 
-    pub fn handle_command(&mut self, matches: ArgMatches) -> Result<Message> {
+    fn handle_remove(&mut self, args: RemoveArgs) -> Result<Message> {
+        let mut nb_path = self.nb_root_dir.clone();
+        nb_path.push(&args.name);
+        if !fs::exists(&nb_path)? {
+            Err(AppError::NotFound)?;
+        }
+        self.fs.delete_file(&nb_path)?;
+        Ok(Message::DeletedNoteBook)
+    }
+
+    fn handle_list(&self) -> Result<Message> {
+        let files = self.fs.get_files(&self.nb_root_dir)?;
+        Ok(Message::ListOfNoteBooks(files))
+    }
+
+    fn handle_open(&mut self, args: OpenArgs) -> Result<Message> {
+        let mut notebook_path = self.nb_root_dir.to_owned();
+        let notebook = args
+            .name
+            .as_deref()
+            .unwrap_or(&self.config.default_notebook);
+        notebook_path.push(notebook);
+        if !fs::exists(&notebook_path)? {
+            return Err(AppError::NotFound.into());
+        }
+        self.fs.open_file(&self.config.editor, &notebook_path)?;
+        Ok(Message::EmptyMessage)
+    }
+
+    fn handle_completions(&self, args: CompletionArgs) -> Result<Message> {
+        let script = match args.shell {
+            Shell::Zsh => include_str!("../completions/_nb").to_owned(),
+        };
+        Ok(Message::CompletionScript(script))
+    }
+
+    fn handle_config(&self, args: ConfigArgs) -> Result<Message> {
+        match args.subcommand {
+            ConfigSubcommand::Generate(args) => self.handle_config_generate(args),
+            ConfigSubcommand::Get(args) => self.handle_config_get(args),
+            ConfigSubcommand::List => self.handle_config_list(),
+        }
+    }
+
+    fn handle_config_generate(&self, args: ConfigGenerateArgs) -> Result<Message> {
+        let config_file_path = config::config_file();
+        let config_exists = self.fs.exists(&config_file_path)?;
+        if config_exists && !args.force {
+            return Err(AppError::ConfigAlreadyExists(config_file_path).into());
+        }
+        let config = Config::default();
+        let config_string = config.to_string();
+        self.fs.write_file(&config_file_path, &config_string)?;
+        Ok(Message::GeneratedConfig(config_file_path))
+    }
+
+    fn handle_config_get(&self, args: ConfigGetArgs) -> Result<Message> {
+        Ok(Message::ConfigValues(
+            self.get_config_values(&args.value_names)?,
+        ))
+    }
+
+    fn handle_config_list(&self) -> Result<Message> {
+        Ok(Message::ConfigValues(
+            self.get_config_values(&config::value_names::ALL)?,
+        ))
+    }
+
+    pub fn handle_command(&mut self, command: Cli) -> Result<Message> {
         self.check_editor()?;
         self.check_dir_structure()?;
         self.check_default_notebook()?;
-
-        match matches.subcommand() {
-            Some((cmd::NEW, sub_matches)) => {
-                let name = sub_matches.get_one::<String>(arg::NAME).unwrap();
-                self.create_notebook(name)
-            }
-            Some((cmd::OPEN, sub_matches)) => {
-                let name = sub_matches.get_one::<String>(arg::NAME).unwrap();
-                self.open_notebook(name)
-            }
-            Some((cmd::REMOVE, sub_matches)) => {
-                let name = sub_matches.get_one::<String>(arg::NAME).unwrap();
-                self.delete_node_book(name)
-            }
-            Some((cmd::LIST, _sub_matches)) => self.list_notebooks(),
-            Some((cmd::COMPLETIONS, sub_matches)) => {
-                let shell = sub_matches.get_one::<Shell>(arg::SHELL).unwrap();
-                self.get_completion_script(shell)
-            }
-            Some((cmd::CONFIG, sub_matches)) => match sub_matches.subcommand() {
-                Some((cmd::CONFIG_GENERATE, sub_matches)) => {
-                    let force = sub_matches.get_flag(arg::FORCE);
-                    self.generate_config(force)
-                }
-                Some((cmd::CONFIG_GET, sub_matches)) => {
-                    let values: Vec<String> = sub_matches
-                        .get_many(arg::VALUE_NAME)
-                        .unwrap()
-                        .cloned()
-                        .collect();
-                    self.config_values(&values)
-                }
-                Some((cmd::CONFIG_LIST, _sub_matches)) => self.all_config_values(),
-                _ => Err(AppError::CommandNotHandled)?,
-            },
-            _ => Err(AppError::CommandNotHandled)?,
+        match command.subcommand {
+            Subcommand::New(args) => self.handle_new(args),
+            Subcommand::Open(args) => self.handle_open(args),
+            Subcommand::Remove(args) => self.handle_remove(args),
+            Subcommand::List => self.handle_list(),
+            Subcommand::Completions(args) => self.handle_completions(args),
+            Subcommand::Config(args) => self.handle_config(args),
         }
     }
 }
