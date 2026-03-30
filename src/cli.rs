@@ -32,6 +32,9 @@ pub enum Subcommand {
 
     #[command(about = "Completion script for specific shell")]
     Completions(CompletionArgs),
+
+    #[command(about = "Use archive")]
+    Archive(ArchiveArgs),
 }
 
 #[derive(Args)]
@@ -97,6 +100,47 @@ pub struct CompletionArgs {
 pub enum Shell {
     Zsh,
 }
+
+#[derive(Args)]
+pub struct ArchiveArgs {
+    #[command(subcommand)]
+    pub subcommand: ArchiveSubcommand,
+}
+
+
+#[derive(ClapSubcommand)]
+pub enum ArchiveSubcommand {
+    Save(ArchiveSaveArgs),
+    List,
+    Open(ArchiveOpenArgs),
+    Restore(ArchiveRestoreArgs),
+    Remove(ArchiveRemoveArgs),
+}
+
+#[derive(Args)]
+pub struct ArchiveSaveArgs {
+    #[arg(help = "Name of the notebook to archive")]
+    pub name: String,
+}
+
+#[derive(Args)]
+pub struct ArchiveOpenArgs {
+    #[arg(help = "Name of the notebook to open")]
+    pub name: String,
+}
+
+#[derive(Args)]
+pub struct ArchiveRestoreArgs {
+    #[arg(help = "Name of the notebook to restore from archive")]
+    pub name: String,
+}
+
+#[derive(Args)]
+pub struct ArchiveRemoveArgs {
+    #[arg(help = "Name of the notebook to delete from archive")]
+    pub name: String,
+}
+
 
 fn non_empty_trimmed(s: &str) -> Result<String, String> {
     let trimmed = s.trim();
