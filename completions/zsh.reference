@@ -32,28 +32,28 @@ _nb() {
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the note book to be created.:_default' \
+':name -- Name of the notebook to be created.:_default' \
 && ret=0
 ;;
 (open)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-'::name -- Name of the note book to open.:_default' \
+'::name -- Name of the notebook to open.:_default' \
 && ret=0
 ;;
 (remove)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the note book to be deleted.:_default' \
+':name -- Name of the notebook to be deleted.:_default' \
 && ret=0
 ;;
 (rm)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the note book to be deleted.:_default' \
+':name -- Name of the notebook to be deleted.:_default' \
 && ret=0
 ;;
 (list)
@@ -94,10 +94,16 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-'*::value_name -- Values to get from the config:_default' \
+'*::value_names -- Values to get from the config:_default' \
 && ret=0
 ;;
 (list)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(ls)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -115,6 +121,71 @@ _arguments "${_arguments_options[@]}" : \
 '--help[Print help]' \
 && ret=0
 ;;
+(archive)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+":: :_nb__archive_commands" \
+"*::: :->archive" \
+&& ret=0
+
+    case $state in
+    (archive)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:nb-archive-command-$line[1]:"
+        case $line[1] in
+            (save)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Name of the notebook to archive:_default' \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(ls)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(open)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Name of the notebook to open:_default' \
+&& ret=0
+;;
+(restore)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Name of the notebook to restore from archive:_default' \
+&& ret=0
+;;
+(remove)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Name of the notebook to delete from archive:_default' \
+&& ret=0
+;;
+(rm)
+_arguments "${_arguments_options[@]}" : \
+'-h[Print help]' \
+'--help[Print help]' \
+':name -- Name of the notebook to delete from archive:_default' \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
         esac
     ;;
 esac
@@ -123,16 +194,55 @@ esac
 (( $+functions[_nb_commands] )) ||
 _nb_commands() {
     local commands; commands=(
-'new:Create a new note book' \
-'open:Open a note book' \
-'remove:Delete a note book' \
-'rm:Delete a note book' \
-'list:List existing note books' \
-'ls:List existing note books' \
+'new:Create a new notebook' \
+'open:Open a notebook' \
+'remove:Delete a notebook' \
+'rm:Delete a notebook' \
+'list:List existing notebooks' \
+'ls:List existing notebooks' \
 'config:Access config via cli' \
 'completions:Completion script for specific shell' \
+'archive:View and manage archive' \
     )
     _describe -t commands 'nb commands' commands "$@"
+}
+(( $+functions[_nb__archive_commands] )) ||
+_nb__archive_commands() {
+    local commands; commands=(
+'save:Archive a specific notebook' \
+'list:List all archived notebooks' \
+'ls:List all archived notebooks' \
+'open:Open a archived notebook' \
+'restore:Restore a notebook from the archive' \
+'remove:Delete a archived notebook permanently' \
+'rm:Delete a archived notebook permanently' \
+    )
+    _describe -t commands 'nb archive commands' commands "$@"
+}
+(( $+functions[_nb__archive__list_commands] )) ||
+_nb__archive__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb archive list commands' commands "$@"
+}
+(( $+functions[_nb__archive__open_commands] )) ||
+_nb__archive__open_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb archive open commands' commands "$@"
+}
+(( $+functions[_nb__archive__remove_commands] )) ||
+_nb__archive__remove_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb archive remove commands' commands "$@"
+}
+(( $+functions[_nb__archive__restore_commands] )) ||
+_nb__archive__restore_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb archive restore commands' commands "$@"
+}
+(( $+functions[_nb__archive__save_commands] )) ||
+_nb__archive__save_commands() {
+    local commands; commands=()
+    _describe -t commands 'nb archive save commands' commands "$@"
 }
 (( $+functions[_nb__completions_commands] )) ||
 _nb__completions_commands() {
@@ -145,6 +255,7 @@ _nb__config_commands() {
 'generate:Generate a default config file' \
 'get:Get specific config values' \
 'list:List all config values' \
+'ls:List all config values' \
     )
     _describe -t commands 'nb config commands' commands "$@"
 }
