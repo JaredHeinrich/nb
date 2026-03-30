@@ -14,10 +14,10 @@ impl Display for Message {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CreatedNoteBook => {
-                writeln!(f, "Created note book")
+                writeln!(f, "Created notebook")
             }
             Self::DeletedNoteBook => {
-                writeln!(f, "Deleted note book")
+                writeln!(f, "Deleted notebook")
             }
             Self::ListOfNoteBooks(file_names) => {
                 for file_name in file_names {

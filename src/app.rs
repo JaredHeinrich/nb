@@ -5,8 +5,7 @@ use std::process::Stdio;
 use anyhow::{Ok, Result};
 
 use crate::cli::{
-    Cli, CompletionArgs, ConfigArgs, ConfigGenerateArgs, ConfigGetArgs, ConfigSubcommand, NewArgs,
-    OpenArgs, RemoveArgs, Shell, Subcommand,
+    ArchiveArgs, ArchiveOpenArgs, ArchiveRemoveArgs, ArchiveRestoreArgs, ArchiveSaveArgs, ArchiveSubcommand, Cli, CompletionArgs, ConfigArgs, ConfigGenerateArgs, ConfigGetArgs, ConfigSubcommand, NewArgs, OpenArgs, RemoveArgs, Shell, Subcommand
 };
 use crate::config;
 use crate::config::{Config, PartialConfig};
@@ -162,6 +161,36 @@ impl<FS: FileOperations> App<FS> {
         ))
     }
 
+    fn handle_archive(&self, args: ArchiveArgs) -> Result<Message> {
+        match args.subcommand {
+            ArchiveSubcommand::Save(args) => self.handle_archive_save(args),
+            ArchiveSubcommand::List => self.handle_archive_list(),
+            ArchiveSubcommand::Open(args) => self.handle_archive_open(args),
+            ArchiveSubcommand::Restore(args) => self.handle_archive_restore(args),
+            ArchiveSubcommand::Remove(args) => self.handle_archive_remove(args),
+        }
+    }
+
+    fn handle_archive_save(&self, args: ArchiveSaveArgs) -> Result<Message> {
+        todo!("Not implemented");
+    }
+
+    fn handle_archive_list(&self) -> Result<Message> {
+        todo!("Not implemented");
+    }
+
+    fn handle_archive_open(&self, args: ArchiveOpenArgs) -> Result<Message> {
+        todo!("Not implemented");
+    }
+
+    fn handle_archive_restore(&self, args: ArchiveRestoreArgs) -> Result<Message> {
+        todo!("Not implemented");
+    }
+
+    fn handle_archive_remove(&self, args: ArchiveRemoveArgs) -> Result<Message> {
+        todo!("Not implemented");
+    }
+
     pub fn handle_command(&mut self, command: Cli) -> Result<Message> {
         self.check_editor()?;
         self.check_dir_structure()?;
@@ -173,6 +202,7 @@ impl<FS: FileOperations> App<FS> {
             Subcommand::List => self.handle_list(),
             Subcommand::Completions(args) => self.handle_completions(args),
             Subcommand::Config(args) => self.handle_config(args),
+            Subcommand::Archive(args) => self.handle_archive(args),
         }
     }
 }
