@@ -154,7 +154,8 @@ _nb() {
             ;;
           (restore)
             _arguments \
-              ':name -- Name of the notebook to restore from archive:_archived_notebooks' \
+              ':archive_name -- Name of the notebook to restore from archive:_archived_notebooks' \
+              '--new-name+[New name of the notebook after its restored]:NEW_NAME:' \
               && ret=0
             ;;
           (remove)

@@ -8,7 +8,9 @@ pub enum Message {
     CompletionScript(String),
     ConfigValues(Vec<(String, String)>),
     GeneratedConfig(PathBuf),
-    EmptyMessage,
+    ArchivedNotebook((String, String)),
+    RestoredNotebook((String, String)),
+    Empty,
 }
 impl Display for Message {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -26,7 +28,6 @@ impl Display for Message {
                 Ok(())
             }
             Self::CompletionScript(script) => writeln!(f, "{script}"),
-            Self::GeneratedConfig(path) => writeln!(f, "Generated config_file {path:?}"),
             Self::ConfigValues(config_values) => {
                 let col1_width = config_values
                     .iter()
@@ -38,7 +39,10 @@ impl Display for Message {
                 }
                 Ok(())
             }
-            Self::EmptyMessage => write!(f, ""),
+            Self::GeneratedConfig(path) => writeln!(f, "Generated config_file {path:?}"),
+            Self::ArchivedNotebook((original_name, archived_name)) => writeln!(f, "Archived notebook {original_name} to {archived_name}"),
+            Self::RestoredNotebook((archived_name, new_name)) => writeln!(f, "Restored notebook {archived_name} to {new_name}"),
+            Self::Empty => Ok(()),
         }
     }
 }

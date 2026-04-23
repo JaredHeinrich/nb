@@ -144,7 +144,11 @@ pub struct ArchiveOpenArgs {
 #[derive(Args)]
 pub struct ArchiveRestoreArgs {
     #[arg(help = "Name of the notebook to restore from archive")]
-    pub name: String,
+    pub archive_name: String,
+
+    #[arg(help = "New name of the notebook after its restored")]
+    #[arg(short, long)]
+    pub new_name: Option<String>,
 }
 
 #[derive(Args)]
