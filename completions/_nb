@@ -1,6 +1,8 @@
 #compdef nb
 
-NB_ROOT_DIR="$HOME/.notebooks"
+NB_ROOT_DIR="$HOME/.nb"
+NOTEBOOK_DIR_NAME="notebooks"
+ARCHIVE_DIR_NAME="archive"
 
 _nb() {
   typeset -A opt_args
@@ -51,6 +53,9 @@ _nb() {
           ;;
         (config)
           _nb_config && ret=0
+          ;;
+        (archive)
+          _nb_archive && ret=0
           ;;
       esac
       ;;
@@ -144,17 +149,17 @@ _nb() {
             ;;
           (open)
             _arguments \
-              ':name -- Name of the notebook to open:_default' \
+              ':name -- Name of the notebook to open:_archived_notebooks' \
               && ret=0
             ;;
           (restore)
             _arguments \
-              ':name -- Name of the notebook to restore from archive:_default' \
+              ':name -- Name of the notebook to restore from archive:_archived_notebooks' \
               && ret=0
             ;;
           (remove)
             _arguments \
-              ':name -- Name of the notebook to delete from archive:_default' \
+              ':name -- Name of the notebook to delete from archive:_archived_notebooks' \
               && ret=0
             ;;
         esac
@@ -165,14 +170,27 @@ _nb() {
 
 (( $+functions[_notebooks] )) ||
   _notebooks() {
-    [[ -d $NB_ROOT_DIR ]] || return 1
+    [[ -d "$NB_ROOT_DIR/$NOTEBOOK_DIR_NAME" ]] || return 1
 
     local -a file_paths
-    file_paths=($NB_ROOT_DIR/*(N))
+    file_paths=("$NB_ROOT_DIR/$NOTEBOOK_DIR_NAME"/*(N))
 
     local -a file_names
     file_names=(${file_paths:t})
-    _describe 'notebook' file_names
+    _wanted notebooks expl 'notebook' compadd -Q -- $file_names
   }
 
+(( $+functions[_archived_notebooks] )) ||
+  _archived_notebooks() {
+    [[ -d "$NB_ROOT_DIR/$ARCHIVE_DIR_NAME" ]] || return 1
+
+    local -a file_paths
+    file_paths=("$NB_ROOT_DIR/$ARCHIVE_DIR_NAME"/*(N))
+
+    local -a file_names
+    file_names=(${file_paths:t})
+    _wanted archived expl 'archived' compadd -Q -- $file_names
+  }
+
+_nb
 # vim: ft=zsh sw=2 ts=2 et
