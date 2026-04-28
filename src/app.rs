@@ -160,7 +160,9 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn handle_list(&self) -> Result<Message> {
-        let files = self.fs.get_files(&self.get_dir_path(NotebookType::Active))?;
+        let files = self
+            .fs
+            .get_files(&self.get_dir_path(NotebookType::Active))?;
         Ok(Message::ListOfNoteBooks(files))
     }
 
@@ -239,7 +241,9 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn handle_archive_list(&self) -> Result<Message> {
-        let files = self.fs.get_files(&self.get_dir_path(NotebookType::Archived))?;
+        let files = self
+            .fs
+            .get_files(&self.get_dir_path(NotebookType::Archived))?;
         Ok(Message::ListOfNoteBooks(files))
     }
 
@@ -252,7 +256,8 @@ impl<FS: FileOperations> App<FS> {
             match args.archive_name.rsplit_once('_') {
                 Some((name, _time_stamp)) => name,
                 None => args.archive_name.as_str(),
-            }.to_owned()
+            }
+            .to_owned()
         });
         let path = self.get_nb_path(new_name.as_str(), NotebookType::Active);
         if self.fs.exists(&path)? {

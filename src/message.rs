@@ -40,8 +40,12 @@ impl Display for Message {
                 Ok(())
             }
             Self::GeneratedConfig(path) => writeln!(f, "Generated config_file {path:?}"),
-            Self::ArchivedNotebook((original_name, archived_name)) => writeln!(f, "Archived notebook {original_name} to {archived_name}"),
-            Self::RestoredNotebook((archived_name, new_name)) => writeln!(f, "Restored notebook {archived_name} to {new_name}"),
+            Self::ArchivedNotebook((original_name, archived_name)) => {
+                writeln!(f, "Archived notebook {original_name} to {archived_name}")
+            }
+            Self::RestoredNotebook((archived_name, new_name)) => {
+                writeln!(f, "Restored notebook {archived_name} to {new_name}")
+            }
             Self::Empty => Ok(()),
         }
     }
