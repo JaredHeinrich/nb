@@ -108,7 +108,6 @@ pub struct ArchiveArgs {
     pub subcommand: ArchiveSubcommand,
 }
 
-
 #[derive(ClapSubcommand)]
 pub enum ArchiveSubcommand {
     #[command(about = "Archive a specific notebook")]
@@ -156,7 +155,6 @@ pub struct ArchiveRemoveArgs {
     #[arg(help = "Name of the notebook to delete from archive")]
     pub name: String,
 }
-
 
 fn non_empty_trimmed(s: &str) -> Result<String, String> {
     let trimmed = s.trim();

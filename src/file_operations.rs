@@ -70,6 +70,8 @@ impl FileOperations for FileSystem {
     }
 
     fn copy(&mut self, source_path: &Path, destination_path: &Path) -> Result<()> {
-        fs::copy(source_path, destination_path).map(|_|()).map_err(Into::into)
+        fs::copy(source_path, destination_path)
+            .map(|_| ())
+            .map_err(Into::into)
     }
 }
