@@ -3,7 +3,7 @@ use clap::{Args, Parser, ValueEnum};
 
 #[derive(Parser)]
 #[command(version = "0.1.0")]
-#[command(about = "CLI note book manager")]
+#[command(about = "CLI notebook manager")]
 #[command(disable_help_subcommand = true)]
 #[command(flatten_help = true)]
 pub struct Cli {
@@ -13,18 +13,18 @@ pub struct Cli {
 
 #[derive(ClapSubcommand)]
 pub enum Subcommand {
-    #[command(about = "Create a new note book")]
+    #[command(about = "Create a new notebook")]
     New(NewArgs),
 
-    #[command(about = "Open a note book")]
+    #[command(about = "Open a notebook")]
     Open(OpenArgs),
 
-    #[command(about = "Delete a note book")]
-    #[clap(alias = "rm")]
+    #[command(about = "Delete a notebook")]
+    #[clap(visible_alias = "rm")]
     Remove(RemoveArgs),
 
-    #[command(about = "List existing note books")]
-    #[clap(alias = "ls")]
+    #[command(about = "List existing notebooks")]
+    #[clap(visible_alias = "ls")]
     List,
 
     #[command(about = "Access config via cli")]
@@ -32,24 +32,27 @@ pub enum Subcommand {
 
     #[command(about = "Completion script for specific shell")]
     Completions(CompletionArgs),
+
+    #[command(about = "View and manage archive")]
+    Archive(ArchiveArgs),
 }
 
 #[derive(Args)]
 pub struct NewArgs {
-    #[arg(help = "Name of the note book to be created.")]
+    #[arg(help = "Name of the notebook to be created.")]
     #[arg(value_parser=non_empty_trimmed)]
     pub name: String,
 }
 
 #[derive(Args)]
 pub struct OpenArgs {
-    #[arg(help = "Name of the note book to open.")]
+    #[arg(help = "Name of the notebook to open.")]
     pub name: Option<String>,
 }
 
 #[derive(Args)]
 pub struct RemoveArgs {
-    #[arg(help = "Name of the note book to be deleted.")]
+    #[arg(help = "Name of the notebook to be deleted.")]
     pub name: String,
 }
 
@@ -68,6 +71,7 @@ pub enum ConfigSubcommand {
     Get(ConfigGetArgs),
 
     #[command(about = "List all config values")]
+    #[clap(visible_alias = "ls")]
     List,
 }
 
@@ -96,6 +100,60 @@ pub struct CompletionArgs {
 #[derive(ValueEnum, Clone, PartialEq, Debug)]
 pub enum Shell {
     Zsh,
+}
+
+#[derive(Args)]
+pub struct ArchiveArgs {
+    #[command(subcommand)]
+    pub subcommand: ArchiveSubcommand,
+}
+
+#[derive(ClapSubcommand)]
+pub enum ArchiveSubcommand {
+    #[command(about = "Archive a specific notebook")]
+    Save(ArchiveSaveArgs),
+
+    #[command(about = "List all archived notebooks")]
+    #[clap(visible_alias = "ls")]
+    List,
+
+    #[command(about = "Open a archived notebook")]
+    Open(ArchiveOpenArgs),
+
+    #[command(about = "Restore a notebook from the archive")]
+    Restore(ArchiveRestoreArgs),
+
+    #[command(about = "Delete a archived notebook permanently")]
+    #[clap(visible_alias = "rm")]
+    Remove(ArchiveRemoveArgs),
+}
+
+#[derive(Args)]
+pub struct ArchiveSaveArgs {
+    #[arg(help = "Name of the notebook to archive")]
+    pub name: String,
+}
+
+#[derive(Args)]
+pub struct ArchiveOpenArgs {
+    #[arg(help = "Name of the notebook to open")]
+    pub name: String,
+}
+
+#[derive(Args)]
+pub struct ArchiveRestoreArgs {
+    #[arg(help = "Name of the notebook to restore from archive")]
+    pub archive_name: String,
+
+    #[arg(help = "New name of the notebook after its restored")]
+    #[arg(short, long)]
+    pub new_name: Option<String>,
+}
+
+#[derive(Args)]
+pub struct ArchiveRemoveArgs {
+    #[arg(help = "Name of the notebook to delete from archive")]
+    pub name: String,
 }
 
 fn non_empty_trimmed(s: &str) -> Result<String, String> {
@@ -160,6 +218,36 @@ mod tests {
             panic!()
         };
         assert_eq!(args.name.as_deref(), Some("my_notebook"));
+    }
+
+    #[test]
+    fn test_remove_multiple_names() {
+        assert!(Cli::try_parse_from(["nb", "remove", "a", "b"]).is_err());
+    }
+
+    #[test]
+    fn test_remove() {
+        let cli = Cli::parse_from(["nb", "remove", "my_notebook"]);
+        let Subcommand::Remove(args) = cli.subcommand else {
+            panic!()
+        };
+        assert_eq!(&args.name, "my_notebook");
+        let cli = Cli::parse_from(["nb", "rm", "my_notebook"]);
+        let Subcommand::Remove(args) = cli.subcommand else {
+            panic!()
+        };
+        assert_eq!(&args.name, "my_notebook");
+    }
+
+    #[test]
+    fn test_list_additional_argument() {
+        assert!(Cli::try_parse_from(["nb", "list", "my_notebook"]).is_err());
+    }
+
+    #[test]
+    fn test_list() {
+        let cli = Cli::parse_from(["nb", "list"]);
+        assert!(matches!(cli.subcommand, Subcommand::List));
     }
 
     #[test]
@@ -257,5 +345,10 @@ mod tests {
             panic!()
         };
         assert!(matches!(config_args.subcommand, ConfigSubcommand::List));
+    }
+
+    #[test]
+    fn test_archive() {
+        assert!(false);
     }
 }

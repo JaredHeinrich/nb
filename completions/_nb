@@ -1,6 +1,8 @@
 #compdef nb
 
-NB_ROOT_DIR="$HOME/.notebooks"
+NB_ROOT_DIR="$HOME/.nb"
+NOTEBOOK_DIR_NAME="notebooks"
+ARCHIVE_DIR_NAME="archive"
 
 _nb() {
   typeset -A opt_args
@@ -20,25 +22,28 @@ _nb() {
       case $words[1] in
         (new)
           _arguments \
-            ':name -- Name of the note book to be created.:' \
+            ':name -- Name of the notebook to be created.:' \
             && ret=0
           ;;
         (open)
           _arguments \
-            '::name -- Name of the note book to open.:_notebooks' \
+            '::name -- Name of the notebook to open.:_notebooks' \
             && ret=0
           ;;
         (remove)
           _arguments \
-            ':name -- Name of the note book to be deleted.:_notebooks' \
+            ':name -- Name of the notebook to be deleted.:_notebooks' \
             && ret=0
           ;;
         (rm)
           _arguments \
-            ':name -- Name of the note book to be deleted.:_notebooks' \
+            ':name -- Name of the notebook to be deleted.:_notebooks' \
             && ret=0
           ;;
         (list)
+          ret=0
+          ;;
+        (ls)
           ret=0
           ;;
         (completions)
@@ -48,6 +53,9 @@ _nb() {
           ;;
         (config)
           _nb_config && ret=0
+          ;;
+        (archive)
+          _nb_archive && ret=0
           ;;
       esac
       ;;
@@ -59,12 +67,13 @@ _nb() {
 (( $+functions[_nb_subcommands] )) ||
   _nb_subcommands() {
     local -a commands=(
-      "new:Create a new note book"
-      "open:Open a note book"
-      "remove:Delete a note book"
-      "list:List existing note books"
+      "new:Create a new notebook"
+      "open:Open a notebook"
+      "remove:Delete a notebook"
+      "list:List existing notebooks"
       "config:Access config via cli"
       "completions:Completion script for specific shell"
+      "archive:View and manage archive"
     )
     _describe -t commands 'nb commands' commands "$@"
   }
@@ -108,16 +117,81 @@ _nb() {
     return $ret
   }
 
+(( $+functions[_nb_archive_subcommands] )) ||
+  _nb_archive_subcommands() {
+    local -a commands=(
+      "save:Archive a specific notebook"
+      "list:List all archived notebooks"
+      "open:Open a archived notebook"
+      "restore:Restore a notebook from the archive"
+      "remove:Delete a archived notebook permanently"
+    )
+    _describe -t commands 'command' commands "$@"
+  }
+
+(( $+functions[_nb_archive] )) ||
+  _nb_archive() {
+    local ret=1
+    _arguments -C \
+      '1: :_nb_archive_subcommands' \
+      '*:: :->arg' \
+      && ret=0
+    case $state in
+      (arg)
+        case $words[1] in
+          (save)
+            _arguments \
+              ':name -- Name of the notebook to archive:_notebooks' \
+              && ret=0
+            ;;
+          (list)
+            ret=0
+            ;;
+          (open)
+            _arguments \
+              ':name -- Name of the notebook to open:_archived_notebooks' \
+              && ret=0
+            ;;
+          (restore)
+            _arguments \
+              ':archive_name -- Name of the notebook to restore from archive:_archived_notebooks' \
+              '--new-name+[New name of the notebook after its restored]:NEW_NAME:' \
+              && ret=0
+            ;;
+          (remove)
+            _arguments \
+              ':name -- Name of the notebook to delete from archive:_archived_notebooks' \
+              && ret=0
+            ;;
+        esac
+        ;;
+    esac
+    return $ret
+  }
+
 (( $+functions[_notebooks] )) ||
   _notebooks() {
-    [[ -d $NB_ROOT_DIR ]] || return 1
+    [[ -d "$NB_ROOT_DIR/$NOTEBOOK_DIR_NAME" ]] || return 1
 
     local -a file_paths
-    file_paths=($NB_ROOT_DIR/*(N))
+    file_paths=("$NB_ROOT_DIR/$NOTEBOOK_DIR_NAME"/*(N))
 
     local -a file_names
     file_names=(${file_paths:t})
-    _describe 'notebook' file_names
+    _wanted notebooks expl 'notebook' compadd -Q -- $file_names
   }
 
+(( $+functions[_archived_notebooks] )) ||
+  _archived_notebooks() {
+    [[ -d "$NB_ROOT_DIR/$ARCHIVE_DIR_NAME" ]] || return 1
+
+    local -a file_paths
+    file_paths=("$NB_ROOT_DIR/$ARCHIVE_DIR_NAME"/*(N))
+
+    local -a file_names
+    file_names=(${file_paths:t})
+    _wanted archived expl 'archived' compadd -Q -- $file_names
+  }
+
+_nb
 # vim: ft=zsh sw=2 ts=2 et

@@ -1,10 +1,11 @@
+use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
 
 use crate::file_operations::FileOperations;
 
-fn extract_file_name(root_dir_path: &PathBuf, file_path: &PathBuf) -> Result<String> {
+fn extract_file_name(root_dir_path: &Path, file_path: &Path) -> Result<String> {
     if !file_path.starts_with(root_dir_path) {
         return Err(anyhow!("File not in nb root directory"));
     }
@@ -38,7 +39,7 @@ impl MockFileSystem {
         &self.opened_files
     }
 
-    fn is_file(&self, path: &PathBuf) -> bool {
+    fn is_file(&self, path: &Path) -> bool {
         if let Ok(file_name) = extract_file_name(&self.notebook_root_dir, path) {
             if self.files.contains(&file_name) {
                 return true;
@@ -47,7 +48,7 @@ impl MockFileSystem {
         false
     }
 
-    fn is_dir(&self, path: &PathBuf) -> bool {
+    fn is_dir(&self, path: &Path) -> bool {
         if *path == self.notebook_root_dir {
             return true;
         }
@@ -56,14 +57,14 @@ impl MockFileSystem {
 }
 
 impl FileOperations for MockFileSystem {
-    fn get_files(&self, dir: &PathBuf) -> Result<Vec<String>> {
+    fn get_files(&self, dir: &Path) -> Result<Vec<String>> {
         if *dir == self.notebook_root_dir {
             return Ok(self.files.clone());
         }
         Err(anyhow!("Directory does not exist"))
     }
 
-    fn delete_file(&mut self, path: &PathBuf) -> Result<()> {
+    fn delete_file(&mut self, path: &Path) -> Result<()> {
         let file_name = extract_file_name(&self.notebook_root_dir, path)?;
         let file_index = self.files.iter().position(|f| *f == file_name);
         if let Some(file_index) = file_index {
@@ -73,39 +74,43 @@ impl FileOperations for MockFileSystem {
         return Err(anyhow!("File does not exist"));
     }
 
-    fn create_file(&mut self, path: &PathBuf) -> Result<()> {
+    fn create_file(&mut self, path: &Path) -> Result<()> {
         extract_file_name(&self.notebook_root_dir, path).map(|file_name| {
             self.files.push(file_name);
         })
     }
 
-    fn create_dir(&mut self, path: &PathBuf) -> Result<()> {
+    fn create_dir(&mut self, path: &Path) -> Result<()> {
         if *path == self.notebook_root_dir {
             return Err(anyhow!("{:?} already exists", self.notebook_root_dir));
         }
         Err(anyhow!("can't create directories in mock fs"))
     }
 
-    fn open_file(&mut self, _editor_command: &str, path: &PathBuf) -> Result<()> {
+    fn open_file(&mut self, _editor_command: &str, path: &Path) -> Result<()> {
         if !self.is_file(path) {
             return Err(anyhow!("Can't open because its not a file"));
         }
-        self.opened_files.push(path.clone());
+        self.opened_files.push(PathBuf::from(path));
         Ok(())
     }
 
-    fn exists(&self, path: &PathBuf) -> Result<bool> {
+    fn exists(&self, path: &Path) -> Result<bool> {
         if self.is_dir(path) || self.is_file(path) {
             return Ok(true);
         }
         return Ok(false);
     }
 
-    fn read_file(&self, _path: &PathBuf) -> Result<String> {
+    fn read_file(&self, _path: &Path) -> Result<String> {
         Err(anyhow!("Can't read from file in mock file system"))
     }
 
-    fn write_file(&self, _path: &PathBuf, _value: &str) -> Result<()> {
+    fn write_file(&mut self, _path: &Path, _value: &str) -> Result<()> {
         Err(anyhow!("Can't write to file in mock file system"))
+    }
+
+    fn copy(&mut self, _source_path: &Path, _destination_path: &Path) -> Result<()> {
+        Err(anyhow!("Can't copy files in mock file system"))
     }
 }
