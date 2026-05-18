@@ -167,6 +167,8 @@ fn non_empty_trimmed(s: &str) -> Result<String, String> {
 
 #[cfg(test)]
 mod tests {
+    use core::panic;
+
     use super::*;
 
     #[test]
@@ -348,7 +350,98 @@ mod tests {
     }
 
     #[test]
-    fn test_archive() {
-        assert!(false);
+    fn test_archive_no_subcommand() {
+        assert!(Cli::try_parse_from(["nb", "archive"]).is_err());
+    }
+
+    #[test]
+    fn test_archive_wrong_subcommand() {
+        assert!(Cli::try_parse_from(["nb", "archive", "test"]).is_err());
+    }
+
+    #[test]
+    fn test_archive_save() {
+        assert!(Cli::try_parse_from(["nb", "archive", "save"]).is_err());
+
+        assert!(Cli::try_parse_from(["nb", "archive", "save", "nb_1", "nb_2"]).is_err());
+
+        let cli = Cli::parse_from(["nb", "archive", "save", "nb_1"]);
+        let Subcommand::Archive(archive_args) = cli.subcommand else {
+            panic!();
+        };
+        let ArchiveSubcommand::Save(save_args) = archive_args.subcommand else {
+            panic!();
+        };
+        assert_eq!(save_args.name, "nb_1");
+    }
+
+    #[test]
+    fn test_archive_list() {
+        assert!(Cli::try_parse_from(["nb", "archive", "list", "test"]).is_err());
+
+        let cli = Cli::parse_from(["nb", "archive", "list"]);
+        let Subcommand::Archive(archive_args) = cli.subcommand else {
+            panic!();
+        };
+        assert!(matches!(archive_args.subcommand, ArchiveSubcommand::List));
+    }
+
+    #[test]
+    fn test_archive_open() {
+        assert!(Cli::try_parse_from(["nb", "archive", "open"]).is_err());
+
+        assert!(Cli::try_parse_from(["nb", "archive", "open", "nb_1", "nb_2"]).is_err());
+
+        let cli = Cli::parse_from(["nb", "archive", "open", "nb_1"]);
+        let Subcommand::Archive(archive_args) = cli.subcommand else {
+            panic!();
+        };
+        let ArchiveSubcommand::Open(open_args) = archive_args.subcommand else {
+            panic!();
+        };
+        assert_eq!(open_args.name, "nb_1");
+    }
+
+    #[test]
+    fn test_archive_restore() {
+        assert!(Cli::try_parse_from(["nb", "archive", "restore"]).is_err());
+
+        assert!(Cli::try_parse_from(["nb", "archive", "restore", "nb_1", "nb_2"]).is_err());
+
+        let cli = Cli::parse_from(["nb", "archive", "restore", "nb_1"]);
+        let Subcommand::Archive(archive_args) = cli.subcommand else {
+            panic!();
+        };
+        let ArchiveSubcommand::Restore(restore_args) = archive_args.subcommand else {
+            panic!();
+        };
+        assert_eq!(restore_args.archive_name, "nb_1");
+        assert_eq!(restore_args.new_name, None);
+
+        let cli = Cli::parse_from(["nb", "archive", "restore", "nb_1", "--new-name", "nb"]);
+        let Subcommand::Archive(archive_args) = cli.subcommand else {
+            panic!();
+        };
+        let ArchiveSubcommand::Restore(restore_args) = archive_args.subcommand else {
+            panic!();
+        };
+        assert_eq!(restore_args.archive_name, "nb_1");
+        assert_eq!(restore_args.new_name, Some(String::from("nb")));
+    }
+
+    #[test]
+    fn test_archive_remove() {
+        assert!(Cli::try_parse_from(["nb", "archive", "remove"]).is_err());
+
+        assert!(Cli::try_parse_from(["nb", "archive", "remove", "nb_1", "nb_2"]).is_err());
+
+        let cli = Cli::parse_from(["nb", "archive", "remove", "nb_1"]);
+        let Subcommand::Archive(archive_args) = cli.subcommand else {
+            panic!();
+        };
+        let ArchiveSubcommand::Remove(remove_args) = archive_args.subcommand else {
+            panic!();
+        };
+        assert_eq!(remove_args.name, "nb_1");
     }
 }
