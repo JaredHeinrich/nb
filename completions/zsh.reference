@@ -39,7 +39,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-'::name -- Name of the notebook to open.:_default' \
+':name -- Name of the notebook to open.:_default' \
 && ret=0
 ;;
 (remove)

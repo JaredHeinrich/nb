@@ -47,7 +47,7 @@ pub struct NewArgs {
 #[derive(Args)]
 pub struct OpenArgs {
     #[arg(help = "Name of the notebook to open.")]
-    pub name: Option<String>,
+    pub name: String,
 }
 
 #[derive(Args)]
@@ -219,7 +219,7 @@ mod tests {
         let Subcommand::Open(args) = cli.subcommand else {
             panic!()
         };
-        assert_eq!(args.name.as_deref(), Some("my_notebook"));
+        assert_eq!(args.name, "my_notebook");
     }
 
     #[test]
