@@ -99,15 +99,6 @@ impl<FS: FileOperations> App<FS> {
         Ok(())
     }
 
-    fn check_default_notebook(&mut self) -> Result<()> {
-        let nb_name = self.config.default_notebook.as_str();
-        let nb_path = self.get_nb_path(nb_name, NotebookType::Active);
-        if !self.fs.exists(&nb_path)? {
-            self.fs.create_file(&nb_path)?;
-        }
-        Ok(())
-    }
-
     fn open_notebook(&mut self, name: &str, nb_type: NotebookType) -> Result<Message> {
         let path = self.get_nb_path(name, nb_type);
         if !self.fs.exists(&path)? {
@@ -128,7 +119,6 @@ impl<FS: FileOperations> App<FS> {
         for value_name in value_names {
             let value_name = value_name.as_ref();
             let value = match value_name {
-                config::value_names::DEFAULT_NOTEBOOK => config.default_notebook.as_ref(),
                 config::value_names::EDITOR => config.editor.as_ref(),
                 _ => continue,
             };
@@ -167,12 +157,7 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn handle_open(&mut self, args: cli::OpenArgs) -> Result<Message> {
-        let name = args
-            .name
-            .as_deref()
-            .unwrap_or(&self.config.default_notebook)
-            .to_owned();
-        self.open_notebook(&name, NotebookType::Active)
+        self.open_notebook(&args.name, NotebookType::Active)
     }
 
     fn handle_completions(&self, args: cli::CompletionArgs) -> Result<Message> {
@@ -282,7 +267,6 @@ impl<FS: FileOperations> App<FS> {
     pub fn handle_command(&mut self, command: cli::Cli) -> Result<Message> {
         self.check_editor()?;
         self.check_dir_structure()?;
-        self.check_default_notebook()?;
         match command.subcommand {
             cli::Subcommand::New(args) => self.handle_new(args),
             cli::Subcommand::Open(args) => self.handle_open(args),

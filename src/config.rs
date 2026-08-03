@@ -6,10 +6,9 @@ use serde::{Deserialize, Serialize};
 use crate::file_operations::FileOperations;
 
 pub mod value_names {
-    pub const DEFAULT_NOTEBOOK: &str = "default_notebook";
     pub const EDITOR: &str = "editor";
 
-    pub const ALL: [&str; 2] = [DEFAULT_NOTEBOOK, EDITOR];
+    pub const ALL: [&str; 1] = [EDITOR];
 }
 
 fn config_dir() -> PathBuf {
@@ -27,14 +26,12 @@ pub fn config_file() -> PathBuf {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Config {
-    pub default_notebook: String,
     pub editor: String,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
-            default_notebook: String::from("nb"),
             editor: String::from("nvim"),
         }
     }
@@ -48,9 +45,6 @@ impl Config {
     }
 
     fn apply(&mut self, partial_config: PartialConfig) {
-        if let Some(default_notebook) = partial_config.default_notebook {
-            self.default_notebook = default_notebook;
-        }
         if let Some(editor) = partial_config.editor {
             self.editor = editor;
         }
@@ -66,7 +60,6 @@ impl ToString for Config {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct PartialConfig {
-    pub default_notebook: Option<String>,
     pub editor: Option<String>,
 }
 

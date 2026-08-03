@@ -105,7 +105,7 @@ _nb() {
             ;;
           (get)
             _arguments \
-              '*::value_name:(default_notebook editor)' \
+              '*::value_name:(editor)' \
               && ret=0
             ;;
           (list)
