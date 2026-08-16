@@ -14,3 +14,21 @@ thiserror = {version = "2.0"}
 [build-dependencies]
 clap = { version = "4.6", features = ["derive"] }
 clap_complete = {version = "4.6"}
+
+[lints.clippy]
+pedantic = { level = "deny" }
+style = { level = "deny" }
+complexity = { level = "deny" }
+perf = { level = "deny" }
+
+# unwrap_used = "warn"
+# expect_used = "warn"
+# panic = "warn"
+# todo = "warn"
+# unimplemented = "warn"
+# dbg_macro = "warn"
+# print_stdout = "warn"
+# print_stderr = "warn"
+#
+# unwrap_in_result = "warn"
+# indexing_slicing = "warn"
