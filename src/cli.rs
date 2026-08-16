@@ -39,20 +39,24 @@ pub enum Subcommand {
 
 #[derive(Args)]
 pub struct NewArgs {
-    #[arg(help = "Name of the notebook to be created.")]
+    #[arg(help = "Name of the notebook to be created")]
     #[arg(value_parser=non_empty_trimmed)]
     pub name: String,
 }
 
 #[derive(Args)]
 pub struct OpenArgs {
-    #[arg(help = "Name of the notebook to open.")]
+    #[arg(help = "Name of the notebook to open")]
     pub name: String,
+
+    #[arg(help = "Editor command used to open the notebook")]
+    #[arg(short, long)]
+    pub editor: Option<String>,
 }
 
 #[derive(Args)]
 pub struct RemoveArgs {
-    #[arg(help = "Name of the notebook to be deleted.")]
+    #[arg(help = "Name of the notebook to be deleted")]
     pub name: String,
 }
 
@@ -138,6 +142,10 @@ pub struct ArchiveSaveArgs {
 pub struct ArchiveOpenArgs {
     #[arg(help = "Name of the notebook to open")]
     pub name: String,
+
+    #[arg(help = "Editor command used to open the notebook")]
+    #[arg(short, long)]
+    pub editor: Option<String>,
 }
 
 #[derive(Args)]
@@ -220,6 +228,23 @@ mod tests {
             panic!()
         };
         assert_eq!(args.name, "my_notebook");
+    }
+
+    #[test]
+    fn test_open_with_editor() {
+        let cli = Cli::parse_from(["nb", "open", "my_notebook", "-e", "nvim"]);
+        let Subcommand::Open(args) = cli.subcommand else {
+            panic!()
+        };
+        assert_eq!(args.name, "my_notebook");
+        assert_eq!(args.editor.unwrap(), "nvim");
+
+        let cli = Cli::parse_from(["nb", "open", "my_notebook", "--editor", "nvim"]);
+        let Subcommand::Open(args) = cli.subcommand else {
+            panic!()
+        };
+        assert_eq!(args.name, "my_notebook");
+        assert_eq!(args.editor.unwrap(), "nvim");
     }
 
     #[test]
@@ -399,6 +424,16 @@ mod tests {
         let ArchiveSubcommand::Open(open_args) = archive_args.subcommand else {
             panic!();
         };
+        assert_eq!(open_args.name, "nb_1");
+
+        let cli = Cli::parse_from(["nb", "archive", "open", "-e", "nvim", "nb_1"]);
+        let Subcommand::Archive(archive_args) = cli.subcommand else {
+            panic!();
+        };
+        let ArchiveSubcommand::Open(open_args) = archive_args.subcommand else {
+            panic!();
+        };
+        assert_eq!(open_args.editor.unwrap(), "nvim");
         assert_eq!(open_args.name, "nb_1");
     }
 

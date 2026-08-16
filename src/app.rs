@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use std::process::Stdio;
 
 use anyhow::{Ok, Result};
 use chrono::Local;
@@ -8,6 +7,7 @@ use crate::cli;
 use crate::config;
 use crate::config::{Config, PartialConfig};
 use crate::error::AppError;
+use crate::error::SystemError;
 use crate::file_operations::FileOperations;
 use crate::message::Message;
 
@@ -30,7 +30,7 @@ pub struct App<FS: FileOperations> {
 impl<FS: FileOperations> App<FS> {
     pub fn new(config: config::Config, fs: FS) -> Result<Self> {
         let Some(mut nb_root_dir) = std::env::home_dir() else {
-            return Err(AppError::NoHomeDir.into());
+            return Err(SystemError::NoHomeDir.into());
         };
         nb_root_dir.push(NB_ROOT_DIR);
         Ok(Self {
@@ -63,24 +63,6 @@ impl<FS: FileOperations> App<FS> {
         let mut path = self.get_dir_path(nb_type);
         path.push(name);
         path
-    }
-
-    // TODO remove if not needed
-    // fn name_exists(&self, name: &str) -> Result<bool> {
-    //     let active_path = self.get_nb_path(name, NotebookType::Active);
-    //     let archived_path = self.get_nb_path(name, NotebookType::Archived);
-    //     Ok(self.fs.exists(&active_path)? || self.fs.exists(&archived_path)?)
-    // }
-
-    fn check_editor(&self) -> Result<()> {
-        let res = std::process::Command::new(&self.config.editor)
-            .arg("-v")
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .map(|_| ())
-            .map_err(|_| AppError::EditorNotInstalled(self.config.editor.to_owned()).into());
-        res
     }
 
     fn check_dir_structure(&mut self) -> Result<()> {
@@ -157,6 +139,9 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn handle_open(&mut self, args: cli::OpenArgs) -> Result<Message> {
+        if let Some(editor) = args.editor {
+            self.config.editor = editor;
+        }
         self.open_notebook(&args.name, NotebookType::Active)
     }
 
@@ -233,6 +218,9 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn handle_archive_open(&mut self, args: cli::ArchiveOpenArgs) -> Result<Message> {
+        if let Some(editor) = args.editor {
+            self.config.editor = editor;
+        }
         self.open_notebook(args.name.as_str(), NotebookType::Archived)
     }
 
@@ -265,7 +253,6 @@ impl<FS: FileOperations> App<FS> {
     }
 
     pub fn handle_command(&mut self, command: cli::Cli) -> Result<Message> {
-        self.check_editor()?;
         self.check_dir_structure()?;
         match command.subcommand {
             cli::Subcommand::New(args) => self.handle_new(args),
