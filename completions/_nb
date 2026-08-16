@@ -22,22 +22,23 @@ _nb() {
       case $words[1] in
         (new)
           _arguments \
-            ':name -- Name of the notebook to be created.:' \
+            ':name -- Name of the notebook to be created:' \
             && ret=0
           ;;
         (open)
           _arguments \
-            '::name -- Name of the notebook to open.:_notebooks' \
+            '::name -- Name of the notebook to open:_notebooks' \
+            '--editor+[Editor command used to open the notebook]:EDITOR:' \
             && ret=0
           ;;
         (remove)
           _arguments \
-            ':name -- Name of the notebook to be deleted.:_notebooks' \
+            ':name -- Name of the notebook to be deleted:_notebooks' \
             && ret=0
           ;;
         (rm)
           _arguments \
-            ':name -- Name of the notebook to be deleted.:_notebooks' \
+            ':name -- Name of the notebook to be deleted:_notebooks' \
             && ret=0
           ;;
         (list)
@@ -150,6 +151,7 @@ _nb() {
           (open)
             _arguments \
               ':name -- Name of the notebook to open:_archived_notebooks' \
+              '--editor+[Editor command used to open the notebook]:EDITOR:' \
               && ret=0
             ;;
           (restore)

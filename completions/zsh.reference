@@ -32,28 +32,30 @@ _nb() {
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to be created.:_default' \
+':name -- Name of the notebook to be created:_default' \
 && ret=0
 ;;
 (open)
 _arguments "${_arguments_options[@]}" : \
+'-e+[Editor command used to open the notebook]:EDITOR:_default' \
+'--editor=[Editor command used to open the notebook]:EDITOR:_default' \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to open.:_default' \
+':name -- Name of the notebook to open:_default' \
 && ret=0
 ;;
 (remove)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to be deleted.:_default' \
+':name -- Name of the notebook to be deleted:_default' \
 && ret=0
 ;;
 (rm)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to be deleted.:_default' \
+':name -- Name of the notebook to be deleted:_default' \
 && ret=0
 ;;
 (list)
@@ -156,6 +158,8 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (open)
 _arguments "${_arguments_options[@]}" : \
+'-e+[Editor command used to open the notebook]:EDITOR:_default' \
+'--editor=[Editor command used to open the notebook]:EDITOR:_default' \
 '-h[Print help]' \
 '--help[Print help]' \
 ':name -- Name of the notebook to open:_default' \
