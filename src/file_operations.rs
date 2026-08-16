@@ -1,5 +1,7 @@
 use anyhow::Error;
+use anyhow::Ok;
 use anyhow::Result;
+use std::process::Stdio;
 use std::{
     fs::{self, File},
     path::Path,
@@ -7,6 +9,23 @@ use std::{
 };
 
 use crate::error::FileSystemError;
+use crate::error::SystemError;
+
+fn check_command(command_name: &str) -> Result<()> {
+    let check_command = "which";
+    let status = std::process::Command::new(check_command)
+        .arg(command_name)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .map_err(|_| SystemError::CommandNotInstalled(check_command.to_owned()))?
+        .code()
+        .unwrap_or(1);
+    if status != 0 {
+        Err(SystemError::CommandNotInstalled(command_name.to_owned()))?;
+    }
+    Ok(())
+}
 
 pub trait FileOperations {
     fn get_files(&self, dir: &Path) -> Result<Vec<String>>;
@@ -43,6 +62,7 @@ impl FileOperations for FileSystem {
     }
 
     fn open_file(&mut self, editor_command: &str, path: &Path) -> Result<()> {
+        check_command(editor_command)?;
         if !path.is_file() {
             return Err(FileSystemError::NotAFile(path.to_path_buf()).into());
         }

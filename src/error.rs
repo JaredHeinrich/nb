@@ -6,21 +6,32 @@ use thiserror::Error;
 pub enum AppError {
     AlreadyExists,
     NotFound,
-    EditorNotInstalled(String),
     ConfigAlreadyExists(PathBuf),
-    NoHomeDir,
 }
 impl Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AlreadyExists => writeln!(f, "The notebook already exists."),
             Self::NotFound => writeln!(f, "The notebook does not exists."),
-            Self::EditorNotInstalled(editor) => {
-                writeln!(f, "The configured editor \"{editor}\" is not installed.")
-            }
             Self::ConfigAlreadyExists(path) => {
                 writeln!(f, "A config file already exists {path:?}.")?;
                 writeln!(f, "To overwrite it with the default use --force.")
+            }
+        }
+    }
+}
+
+#[derive(Error, Debug)]
+pub enum SystemError {
+    CommandNotInstalled(String),
+    NoHomeDir,
+}
+
+impl Display for SystemError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CommandNotInstalled(command) => {
+                writeln!(f, "The command \"{command}\" is not installed.")
             }
             Self::NoHomeDir => writeln!(f, "No home directory could be found"),
         }
