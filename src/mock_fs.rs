@@ -1,9 +1,11 @@
+#![allow(clippy::unwrap_used)] // test-only
 use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
 
 use crate::file_operations::FileOperations;
+
 
 fn extract_file_name(root_dir_path: &Path, file_path: &Path) -> Result<String> {
     if !file_path.starts_with(root_dir_path) {
@@ -71,7 +73,7 @@ impl FileOperations for MockFileSystem {
             let _ = self.files.remove(file_index);
             return Ok(());
         }
-        return Err(anyhow!("File does not exist"));
+        Err(anyhow!("File does not exist"))
     }
 
     fn create_file(&mut self, path: &Path) -> Result<()> {
@@ -99,7 +101,7 @@ impl FileOperations for MockFileSystem {
         if self.is_dir(path) || self.is_file(path) {
             return Ok(true);
         }
-        return Ok(false);
+        Ok(false)
     }
 
     fn read_file(&self, _path: &Path) -> Result<String> {
