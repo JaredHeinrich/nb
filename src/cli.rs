@@ -174,6 +174,8 @@ fn non_empty_trimmed(s: &str) -> Result<String, String> {
 }
 
 #[cfg(test)]
+#[allow(clippy::panic)] // tests
+#[allow(clippy::unwrap_used)] // tests
 mod tests {
     use core::panic;
 
