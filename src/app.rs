@@ -92,7 +92,7 @@ impl<FS: FileOperations> App<FS> {
 
     fn get_config_values<T: AsRef<str>>(&self, value_names: &[T]) -> Result<Vec<(String, String)>> {
         let mut config_values: Vec<(String, String)> = Vec::new();
-        let config_file_path = config::config_file();
+        let config_file_path = config::config_file()?;
         let config_exists = self.fs.exists(&config_file_path)?;
         if !config_exists {
             return Ok(config_values);
@@ -111,6 +111,7 @@ impl<FS: FileOperations> App<FS> {
         Ok(config_values)
     }
 
+    #[allow(clippy::needless_pass_by_value)]
     fn handle_new(&mut self, args: cli::NewArgs) -> Result<Message> {
         let name = args.name.as_str();
         let path = self.get_nb_path(name, NotebookType::Active);
@@ -121,6 +122,7 @@ impl<FS: FileOperations> App<FS> {
         Ok(Message::CreatedNoteBook)
     }
 
+    #[allow(clippy::needless_pass_by_value)]
     fn handle_remove(&mut self, args: cli::RemoveArgs) -> Result<Message> {
         let name = args.name.as_str();
         let path = self.get_nb_path(name, NotebookType::Active);
@@ -145,6 +147,8 @@ impl<FS: FileOperations> App<FS> {
         self.open_notebook(&args.name, NotebookType::Active)
     }
 
+    #[allow(clippy::unused_self)]
+    #[allow(clippy::needless_pass_by_value)]
     fn handle_completions(&self, args: cli::CompletionArgs) -> Result<Message> {
         let script = match args.shell {
             cli::Shell::Zsh => include_str!("../completions/_nb").to_owned(),
@@ -160,18 +164,20 @@ impl<FS: FileOperations> App<FS> {
         }
     }
 
+    #[allow(clippy::needless_pass_by_value)]
     fn handle_config_generate(&mut self, args: cli::ConfigGenerateArgs) -> Result<Message> {
-        let config_file_path = config::config_file();
+        let config_file_path = config::config_file()?;
         let config_exists = self.fs.exists(&config_file_path)?;
         if config_exists && !args.force {
             return Err(AppError::ConfigAlreadyExists(config_file_path).into());
         }
         let config = Config::default();
-        let config_string = config.to_string();
+        let config_string = config.to_toml()?;
         self.fs.write_file(&config_file_path, &config_string)?;
         Ok(Message::GeneratedConfig(config_file_path))
     }
 
+    #[allow(clippy::needless_pass_by_value)]
     fn handle_config_get(&self, args: cli::ConfigGetArgs) -> Result<Message> {
         Ok(Message::ConfigValues(
             self.get_config_values(&args.value_names)?,
@@ -202,8 +208,9 @@ impl<FS: FileOperations> App<FS> {
         let time_stamp = Local::now().format("%d-%m-%Y-%H:%M:%S").to_string();
         let archived_name = format!("{}_{time_stamp}", args.name);
         let archived_path = self.get_nb_path(archived_name.as_str(), NotebookType::Archived);
+        #[expect(clippy::todo, reason = "Github issue linked")]
         if self.fs.exists(&archived_path)? {
-            todo!("Same archive file already exists case not handled yet.");
+            todo!("Same archive file already exists case not handled yet. Fixed in Issue #53");
         }
         self.fs.copy(&active_path, &archived_path)?;
         self.fs.delete_file(&active_path)?;

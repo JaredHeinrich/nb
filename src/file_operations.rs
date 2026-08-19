@@ -42,10 +42,18 @@ pub trait FileOperations {
 pub struct FileSystem;
 impl FileOperations for FileSystem {
     fn get_files(&self, dir: &Path) -> Result<Vec<String>> {
-        let files: Vec<String> = fs::read_dir(dir)?
-            .map(|file| file.unwrap().file_name().into_string().unwrap())
-            .filter(|file| !file.starts_with("."))
-            .collect();
+        let mut files = Vec::new();
+        let dir = fs::read_dir(dir)?;
+        for entry in dir {
+            let entry = entry?;
+            let file_name = entry
+                .file_name()
+                .into_string()
+                .map_err(FileSystemError::FileNameNoUTF8)?;
+            if !file_name.starts_with('.') {
+                files.push(file_name);
+            }
+        }
         Ok(files)
     }
 
@@ -70,7 +78,7 @@ impl FileOperations for FileSystem {
             .arg(path.as_os_str())
             .status()
             .map(|_| ())
-            .map_err(|e| e.into())
+            .map_err(std::convert::Into::into)
     }
 
     fn exists(&self, path: &Path) -> Result<bool> {

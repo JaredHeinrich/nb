@@ -27,6 +27,7 @@ fn run() -> Result<Message> {
     app.handle_command(command)
 }
 
+#[allow(clippy::print_stdout)] // global output of cli tool
 fn print_result(result: Result<Message>) {
     match result {
         Ok(m) => print!("{m}"),

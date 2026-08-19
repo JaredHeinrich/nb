@@ -3,7 +3,10 @@ use std::path::PathBuf;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::file_operations::FileOperations;
+use crate::{
+    error::{InternalError, SystemError},
+    file_operations::FileOperations,
+};
 
 pub mod value_names {
     pub const EDITOR: &str = "editor";
@@ -11,17 +14,17 @@ pub mod value_names {
     pub const ALL: [&str; 1] = [EDITOR];
 }
 
-fn config_dir() -> PathBuf {
-    let mut path = std::env::home_dir().expect("Could not retrieve home directory");
+fn config_dir() -> Result<PathBuf> {
+    let mut path = std::env::home_dir().ok_or(SystemError::NoHomeDir)?;
     path.push(".config");
-    path
+    Ok(path)
 }
 
-pub fn config_file() -> PathBuf {
-    let mut path = config_dir();
+pub fn config_file() -> Result<PathBuf> {
+    let mut path = config_dir()?;
     path.push("nb");
     path.push("nb.toml");
-    path
+    Ok(path)
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -49,12 +52,9 @@ impl Config {
             self.editor = editor;
         }
     }
-}
 
-#[allow(clippy::to_string_trait_impl)]
-impl ToString for Config {
-    fn to_string(&self) -> String {
-        toml::to_string(self).expect("Failed serialization of `Config`")
+    pub fn to_toml(&self) -> Result<String> {
+        toml::to_string(self).map_err(|e| InternalError(e.into()).into())
     }
 }
 
@@ -65,7 +65,7 @@ pub struct PartialConfig {
 
 impl PartialConfig {
     pub fn from_config_file<FS: FileOperations>(fs: &FS) -> Result<Self> {
-        let config_file_path = config_file();
+        let config_file_path = config_file()?;
         if let Ok(config_toml) = fs.read_file(&config_file_path) {
             return Ok(toml::from_str(&config_toml)?);
         }
