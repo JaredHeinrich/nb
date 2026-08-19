@@ -41,6 +41,9 @@ mod test {
     fn check_zsh_completion_reference_consistency() {
         let generated = include_str!(concat!(env!("OUT_DIR"), "/_nb"));
         let checked_in = include_str!("../completions/zsh.reference");
-        assert!(generated == checked_in, "completions/zsh.reference outdated");
+        assert!(
+            generated == checked_in,
+            "completions/zsh.reference outdated"
+        );
     }
 }
