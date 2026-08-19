@@ -200,10 +200,13 @@ impl<FS: FileOperations> App<FS> {
             return Err(AppError::NotFound.into());
         }
         let time_stamp = Local::now().format("%d-%m-%Y-%H:%M:%S").to_string();
-        let archived_name = format!("{}_{time_stamp}", args.name);
-        let archived_path = self.get_nb_path(archived_name.as_str(), NotebookType::Archived);
-        if self.fs.exists(&archived_path)? {
-            todo!("Same archive file already exists case not handled yet.");
+        let mut archived_name = format!("{}_{time_stamp}", args.name);
+        let mut archived_path = self.get_nb_path(archived_name.as_str(), NotebookType::Archived);
+        let mut counter = 1u32;
+        while self.fs.exists(&archived_path)? {
+            archived_name = format!("{}_{time_stamp}_{counter}", args.name);
+            archived_path = self.get_nb_path(archived_name.as_str(), NotebookType::Archived);
+            counter += 1;
         }
         self.fs.copy(&active_path, &archived_path)?;
         self.fs.delete_file(&active_path)?;
