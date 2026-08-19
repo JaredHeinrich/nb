@@ -6,7 +6,6 @@ use anyhow::{anyhow, Result};
 
 use crate::file_operations::FileOperations;
 
-
 fn extract_file_name(root_dir_path: &Path, file_path: &Path) -> Result<String> {
     if !file_path.starts_with(root_dir_path) {
         return Err(anyhow!("File not in nb root directory"));
