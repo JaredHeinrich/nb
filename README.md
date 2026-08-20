@@ -15,9 +15,9 @@ Features:
 
 Feature ideas:
 - local notebooks for projects
-- search for notebooks in nvim "\<leader\>nb" -> nvim plugin?
+- search for notebooks in nvim "\<leader\>rn" -> nvim plugin?
 - check if editor exists
 - completion script
 - file completion for open/delete commands
-- better way to open nb
+- better way to open rn
 - sync notebooks to github

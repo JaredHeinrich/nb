@@ -11,7 +11,7 @@ use crate::error::SystemError;
 use crate::file_operations::FileOperations;
 use crate::message::Message;
 
-const NB_ROOT_DIR: &str = ".nb";
+const RN_ROOT_DIR: &str = ".rn";
 const NOTEBOOK_DIR_NAME: &str = "notebooks";
 const ARCHIVE_DIR_NAME: &str = "archive";
 
@@ -23,31 +23,31 @@ enum NotebookType {
 
 pub struct App<FS: FileOperations> {
     pub config: config::Config,
-    pub nb_root_dir: PathBuf,
+    pub rn_root_dir: PathBuf,
     fs: FS,
 }
 
 impl<FS: FileOperations> App<FS> {
     pub fn new(config: config::Config, fs: FS) -> Result<Self> {
-        let Some(mut nb_root_dir) = std::env::home_dir() else {
+        let Some(mut rn_root_dir) = std::env::home_dir() else {
             return Err(SystemError::NoHomeDir.into());
         };
-        nb_root_dir.push(NB_ROOT_DIR);
+        rn_root_dir.push(RN_ROOT_DIR);
         Ok(Self {
             config,
-            nb_root_dir,
+            rn_root_dir,
             fs,
         })
     }
 
     fn notebook_dir(&self) -> PathBuf {
-        let mut notebook_dir = self.nb_root_dir.clone();
+        let mut notebook_dir = self.rn_root_dir.clone();
         notebook_dir.push(NOTEBOOK_DIR_NAME);
         notebook_dir
     }
 
     fn archive_dir(&self) -> PathBuf {
-        let mut notebook_dir = self.nb_root_dir.clone();
+        let mut notebook_dir = self.rn_root_dir.clone();
         notebook_dir.push(ARCHIVE_DIR_NAME);
         notebook_dir
     }
@@ -66,9 +66,9 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn check_dir_structure(&mut self) -> Result<()> {
-        let nb_root_dir = &self.nb_root_dir;
-        if !self.fs.exists(nb_root_dir)? {
-            self.fs.create_dir(nb_root_dir)?;
+        let rn_root_dir = &self.rn_root_dir;
+        if !self.fs.exists(rn_root_dir)? {
+            self.fs.create_dir(rn_root_dir)?;
         }
         let active_dir = self.get_dir_path(NotebookType::Active);
         if !self.fs.exists(&active_dir)? {
@@ -151,7 +151,7 @@ impl<FS: FileOperations> App<FS> {
     #[allow(clippy::needless_pass_by_value)]
     fn handle_completions(&self, args: cli::CompletionArgs) -> Result<Message> {
         let script = match args.shell {
-            cli::Shell::Zsh => include_str!("../completions/_nb").to_owned(),
+            cli::Shell::Zsh => include_str!("../completions/_rn").to_owned(),
         };
         Ok(Message::CompletionScript(script))
     }

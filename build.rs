@@ -12,7 +12,7 @@ fn main() -> Result<(), Error> {
     };
 
     let mut cmd = Cli::command();
-    let path = generate_to(Zsh, &mut cmd, "nb", &outdir)?;
+    let path = generate_to(Zsh, &mut cmd, "rn", &outdir)?;
     println!(
         "cargo:warning=completion file is generated: {}",
         path.display()
