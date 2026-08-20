@@ -211,10 +211,9 @@ impl<FS: FileOperations> App<FS> {
         }
         let time_stamp = Local::now().format("%d-%m-%Y-%H:%M:%S").to_string();
         let archived_name = format!("{name}_{time_stamp}");
-        let archived_path = self.get_nb_path(archived_name.as_str(), NotebookType::Archived);
-        #[expect(clippy::todo, reason = "Github issue linked")]
+        let archived_path = self.get_nb_path(&archived_name, NotebookType::Archived);
         if self.fs.exists(&archived_path)? {
-            todo!("Same archive file already exists case not handled yet. Fixed in Issue #53");
+            return Err(AppError::ArchiveAlreadyExists(archived_name).into());
         }
         self.fs.copy(&active_path, &archived_path)?;
         self.fs.delete_file(&active_path)?;

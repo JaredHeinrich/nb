@@ -9,6 +9,7 @@ pub enum AppError {
     NotFound(String),
     ConfigAlreadyExists(PathBuf),
     RestoreAlreadyExists(String),
+    ArchiveAlreadyExists(String),
 }
 impl Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -30,6 +31,10 @@ impl Display for AppError {
                 )?;
                 writeln!(f, "Or remove/archive the existing notebook.")
             }
+            Self::ArchiveAlreadyExists(name) => writeln!(
+                f,
+                "Archiving failed, because file \"{name}\" already exists."
+            ),
         }
     }
 }
