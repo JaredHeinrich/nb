@@ -39,7 +39,7 @@ fn print_result(result: Result<Message>) {
 mod test {
     #[test]
     fn check_zsh_completion_reference_consistency() {
-        let generated = include_str!(concat!(env!("OUT_DIR"), "/_nb"));
+        let generated = include_str!(concat!(env!("OUT_DIR"), "/_rn"));
         let checked_in = include_str!("../completions/zsh.reference");
         assert!(
             generated == checked_in,
