@@ -25,6 +25,7 @@ thiserror = {version = "2.0"}
 [build-dependencies]
 clap = { version = "4.6", features = ["derive"] }
 clap_complete = {version = "4.6"}
+anyhow = {version = "1.0"}
 
 [lints.clippy]
 pedantic = { level = "warn" }
