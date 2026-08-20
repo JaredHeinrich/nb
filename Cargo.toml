@@ -1,7 +1,19 @@
 [package]
-name = "nb"
+name = "randnote"
 version = "0.1.0"
 edition = "2021"
+description = "CLI tool to manage plain text notes"
+license = "MIT"
+license-file = "LICENSE"
+repository = "https://github.com/JaredHeinrich/randnote"
+readme = "README.md"
+exclude = [
+    "./completions/zsh.reference"
+]
+
+[[bin]]
+name = "rn"
+path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.6", features = ["derive"] }
