@@ -1,5 +1,3 @@
-use anyhow::Error;
-use anyhow::Ok;
 use anyhow::Result;
 use std::process::Stdio;
 use std::{
@@ -58,15 +56,15 @@ impl FileOperations for FileSystem {
     }
 
     fn delete_file(&mut self, path: &Path) -> Result<()> {
-        fs::remove_file(path).map_err(Error::from)
+        fs::remove_file(path).map_err(Into::into)
     }
 
     fn create_file(&mut self, path: &Path) -> Result<()> {
-        File::create_new(path).map_err(Error::from).map(|_| ())
+        File::create_new(path).map_err(Into::into).map(|_| ())
     }
 
     fn create_dir(&mut self, path: &Path) -> Result<()> {
-        fs::create_dir_all(path).map_err(Error::from)
+        fs::create_dir_all(path).map_err(Into::into)
     }
 
     fn open_file(&mut self, editor_command: &str, path: &Path) -> Result<()> {
@@ -78,7 +76,7 @@ impl FileOperations for FileSystem {
             .arg(path.as_os_str())
             .status()
             .map(|_| ())
-            .map_err(std::convert::Into::into)
+            .map_err(Into::into)
     }
 
     fn exists(&self, path: &Path) -> Result<bool> {
