@@ -5,18 +5,30 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum AppError {
-    AlreadyExists,
-    NotFound,
+    AlreadyExists(String),
+    NotFound(String),
     ConfigAlreadyExists(PathBuf),
+    RestoreAlreadyExists(String),
 }
 impl Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AlreadyExists => writeln!(f, "The notebook already exists."),
-            Self::NotFound => writeln!(f, "The notebook does not exists."),
+            Self::AlreadyExists(name) => writeln!(f, "A notebook named \"{name}\" already exists."),
+            Self::NotFound(name) => writeln!(f, "No notebook named \"{name}\" exists."),
             Self::ConfigAlreadyExists(path) => {
                 writeln!(f, "A config file already exists {}.", path.display())?;
-                writeln!(f, "To overwrite it with the default use --force.")
+                writeln!(f, "To overwrite it with the default use `--force`.")
+            }
+            Self::RestoreAlreadyExists(name) => {
+                writeln!(
+                    f,
+                    "Can't restore notebook, because a notebook named \"{name}\" already exists."
+                )?;
+                writeln!(
+                    f,
+                    "Use `--new-name` to change the name of the restored notebook."
+                )?;
+                writeln!(f, "Or remove/archive the existing notebook.")
             }
         }
     }
@@ -34,7 +46,7 @@ impl Display for SystemError {
             Self::CommandNotInstalled(command) => {
                 writeln!(f, "The command \"{command}\" is not installed.")
             }
-            Self::NoHomeDir => writeln!(f, "No home directory could be found"),
+            Self::NoHomeDir => writeln!(f, "No home directory could be found."),
         }
     }
 }

@@ -89,11 +89,7 @@ impl FileOperations for FileSystem {
         fs::read_to_string(path).map_err(Into::into)
     }
 
-    // TODO remove create_dir_all
     fn write_file(&mut self, file_path: &Path, content: &str) -> Result<()> {
-        let mut dir_path = file_path.to_path_buf();
-        dir_path.pop();
-        fs::create_dir_all(dir_path)?;
         fs::write(file_path, content).map_err(Into::into)
     }
 
