@@ -1,8 +1,8 @@
-#compdef nb
+#compdef rn
 
 autoload -U is-at-least
 
-_nb() {
+_rn() {
     typeset -A opt_args
     typeset -a _arguments_options
     local ret=1
@@ -19,14 +19,14 @@ _nb() {
 '--help[Print help]' \
 '-V[Print version]' \
 '--version[Print version]' \
-":: :_nb_commands" \
-"*::: :->nb" \
+":: :_rn_commands" \
+"*::: :->rn" \
 && ret=0
     case $state in
-    (nb)
+    (rn)
         words=($line[1] "${words[@]}")
         (( CURRENT += 1 ))
-        curcontext="${curcontext%:*:*}:nb-command-$line[1]:"
+        curcontext="${curcontext%:*:*}:rn-command-$line[1]:"
         case $line[1] in
             (new)
 _arguments "${_arguments_options[@]}" : \
@@ -74,7 +74,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-":: :_nb__config_commands" \
+":: :_rn__config_commands" \
 "*::: :->config" \
 && ret=0
 
@@ -82,7 +82,7 @@ _arguments "${_arguments_options[@]}" : \
     (config)
         words=($line[1] "${words[@]}")
         (( CURRENT += 1 ))
-        curcontext="${curcontext%:*:*}:nb-config-command-$line[1]:"
+        curcontext="${curcontext%:*:*}:rn-config-command-$line[1]:"
         case $line[1] in
             (generate)
 _arguments "${_arguments_options[@]}" : \
@@ -127,7 +127,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-":: :_nb__archive_commands" \
+":: :_rn__archive_commands" \
 "*::: :->archive" \
 && ret=0
 
@@ -135,7 +135,7 @@ _arguments "${_arguments_options[@]}" : \
     (archive)
         words=($line[1] "${words[@]}")
         (( CURRENT += 1 ))
-        curcontext="${curcontext%:*:*}:nb-archive-command-$line[1]:"
+        curcontext="${curcontext%:*:*}:rn-archive-command-$line[1]:"
         case $line[1] in
             (save)
 _arguments "${_arguments_options[@]}" : \
@@ -197,8 +197,8 @@ esac
 esac
 }
 
-(( $+functions[_nb_commands] )) ||
-_nb_commands() {
+(( $+functions[_rn_commands] )) ||
+_rn_commands() {
     local commands; commands=(
 'new:Create a new notebook' \
 'open:Open a notebook' \
@@ -210,10 +210,10 @@ _nb_commands() {
 'completions:Completion script for specific shell' \
 'archive:View and manage archive' \
     )
-    _describe -t commands 'nb commands' commands "$@"
+    _describe -t commands 'rn commands' commands "$@"
 }
-(( $+functions[_nb__archive_commands] )) ||
-_nb__archive_commands() {
+(( $+functions[_rn__archive_commands] )) ||
+_rn__archive_commands() {
     local commands; commands=(
 'save:Archive a specific notebook' \
 'list:List all archived notebooks' \
@@ -223,86 +223,86 @@ _nb__archive_commands() {
 'remove:Delete a archived notebook permanently' \
 'rm:Delete a archived notebook permanently' \
     )
-    _describe -t commands 'nb archive commands' commands "$@"
+    _describe -t commands 'rn archive commands' commands "$@"
 }
-(( $+functions[_nb__archive__list_commands] )) ||
-_nb__archive__list_commands() {
+(( $+functions[_rn__archive__list_commands] )) ||
+_rn__archive__list_commands() {
     local commands; commands=()
-    _describe -t commands 'nb archive list commands' commands "$@"
+    _describe -t commands 'rn archive list commands' commands "$@"
 }
-(( $+functions[_nb__archive__open_commands] )) ||
-_nb__archive__open_commands() {
+(( $+functions[_rn__archive__open_commands] )) ||
+_rn__archive__open_commands() {
     local commands; commands=()
-    _describe -t commands 'nb archive open commands' commands "$@"
+    _describe -t commands 'rn archive open commands' commands "$@"
 }
-(( $+functions[_nb__archive__remove_commands] )) ||
-_nb__archive__remove_commands() {
+(( $+functions[_rn__archive__remove_commands] )) ||
+_rn__archive__remove_commands() {
     local commands; commands=()
-    _describe -t commands 'nb archive remove commands' commands "$@"
+    _describe -t commands 'rn archive remove commands' commands "$@"
 }
-(( $+functions[_nb__archive__restore_commands] )) ||
-_nb__archive__restore_commands() {
+(( $+functions[_rn__archive__restore_commands] )) ||
+_rn__archive__restore_commands() {
     local commands; commands=()
-    _describe -t commands 'nb archive restore commands' commands "$@"
+    _describe -t commands 'rn archive restore commands' commands "$@"
 }
-(( $+functions[_nb__archive__save_commands] )) ||
-_nb__archive__save_commands() {
+(( $+functions[_rn__archive__save_commands] )) ||
+_rn__archive__save_commands() {
     local commands; commands=()
-    _describe -t commands 'nb archive save commands' commands "$@"
+    _describe -t commands 'rn archive save commands' commands "$@"
 }
-(( $+functions[_nb__completions_commands] )) ||
-_nb__completions_commands() {
+(( $+functions[_rn__completions_commands] )) ||
+_rn__completions_commands() {
     local commands; commands=()
-    _describe -t commands 'nb completions commands' commands "$@"
+    _describe -t commands 'rn completions commands' commands "$@"
 }
-(( $+functions[_nb__config_commands] )) ||
-_nb__config_commands() {
+(( $+functions[_rn__config_commands] )) ||
+_rn__config_commands() {
     local commands; commands=(
 'generate:Generate a default config file' \
 'get:Get specific config values' \
 'list:List all config values' \
 'ls:List all config values' \
     )
-    _describe -t commands 'nb config commands' commands "$@"
+    _describe -t commands 'rn config commands' commands "$@"
 }
-(( $+functions[_nb__config__generate_commands] )) ||
-_nb__config__generate_commands() {
+(( $+functions[_rn__config__generate_commands] )) ||
+_rn__config__generate_commands() {
     local commands; commands=()
-    _describe -t commands 'nb config generate commands' commands "$@"
+    _describe -t commands 'rn config generate commands' commands "$@"
 }
-(( $+functions[_nb__config__get_commands] )) ||
-_nb__config__get_commands() {
+(( $+functions[_rn__config__get_commands] )) ||
+_rn__config__get_commands() {
     local commands; commands=()
-    _describe -t commands 'nb config get commands' commands "$@"
+    _describe -t commands 'rn config get commands' commands "$@"
 }
-(( $+functions[_nb__config__list_commands] )) ||
-_nb__config__list_commands() {
+(( $+functions[_rn__config__list_commands] )) ||
+_rn__config__list_commands() {
     local commands; commands=()
-    _describe -t commands 'nb config list commands' commands "$@"
+    _describe -t commands 'rn config list commands' commands "$@"
 }
-(( $+functions[_nb__list_commands] )) ||
-_nb__list_commands() {
+(( $+functions[_rn__list_commands] )) ||
+_rn__list_commands() {
     local commands; commands=()
-    _describe -t commands 'nb list commands' commands "$@"
+    _describe -t commands 'rn list commands' commands "$@"
 }
-(( $+functions[_nb__new_commands] )) ||
-_nb__new_commands() {
+(( $+functions[_rn__new_commands] )) ||
+_rn__new_commands() {
     local commands; commands=()
-    _describe -t commands 'nb new commands' commands "$@"
+    _describe -t commands 'rn new commands' commands "$@"
 }
-(( $+functions[_nb__open_commands] )) ||
-_nb__open_commands() {
+(( $+functions[_rn__open_commands] )) ||
+_rn__open_commands() {
     local commands; commands=()
-    _describe -t commands 'nb open commands' commands "$@"
+    _describe -t commands 'rn open commands' commands "$@"
 }
-(( $+functions[_nb__remove_commands] )) ||
-_nb__remove_commands() {
+(( $+functions[_rn__remove_commands] )) ||
+_rn__remove_commands() {
     local commands; commands=()
-    _describe -t commands 'nb remove commands' commands "$@"
+    _describe -t commands 'rn remove commands' commands "$@"
 }
 
-if [ "$funcstack[1]" = "_nb" ]; then
-    _nb "$@"
+if [ "$funcstack[1]" = "_rn" ]; then
+    _rn "$@"
 else
-    compdef _nb nb
+    compdef _rn rn
 fi
