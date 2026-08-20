@@ -8,12 +8,12 @@ use crate::file_operations::FileOperations;
 
 fn extract_file_name(root_dir_path: &Path, file_path: &Path) -> Result<String> {
     if !file_path.starts_with(root_dir_path) {
-        return Err(anyhow!("File not in nb root directory"));
+        return Err(anyhow!("File not in rn root directory"));
     }
     let root_dir_path_len = root_dir_path.iter().count();
     let file_path_len = file_path.iter().count();
     if root_dir_path_len + 1 != file_path_len {
-        return Err(anyhow!("Path does not point to file in nb root directory"));
+        return Err(anyhow!("Path does not point to file in rn root directory"));
     }
     let file_name = file_path.file_name().unwrap().to_str().unwrap().to_owned();
     Ok(file_name)

@@ -182,36 +182,36 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_nb_no_subcommand() {
-        assert!(Cli::try_parse_from(["nb"]).is_err());
+    fn test_rn_no_subcommand() {
+        assert!(Cli::try_parse_from(["rn"]).is_err());
     }
 
     #[test]
-    fn test_nb_invalid_subcommands() {
-        assert!(Cli::try_parse_from(["nb", " "]).is_err());
-        assert!(Cli::try_parse_from(["nb", "test"]).is_err());
-        assert!(Cli::try_parse_from(["nb", "-t"]).is_err());
-        assert!(Cli::try_parse_from(["nb", "--test"]).is_err());
+    fn test_rn_invalid_subcommands() {
+        assert!(Cli::try_parse_from(["rn", " "]).is_err());
+        assert!(Cli::try_parse_from(["rn", "test"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "-t"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "--test"]).is_err());
     }
 
     #[test]
     fn test_new_no_name() {
-        assert!(Cli::try_parse_from(["nb", "new"]).is_err());
-        assert!(Cli::try_parse_from(["nb", "new", ""]).is_err());
-        assert!(Cli::try_parse_from(["nb", "new", " "]).is_err());
-        assert!(Cli::try_parse_from(["nb", "new", "\r"]).is_err());
-        assert!(Cli::try_parse_from(["nb", "new", "\n"]).is_err());
-        assert!(Cli::try_parse_from(["nb", "new", "\t"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "new"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "new", ""]).is_err());
+        assert!(Cli::try_parse_from(["rn", "new", " "]).is_err());
+        assert!(Cli::try_parse_from(["rn", "new", "\r"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "new", "\n"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "new", "\t"]).is_err());
     }
 
     #[test]
     fn test_new_multiple_names() {
-        assert!(Cli::try_parse_from(["nb", "new", "a", "b"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "new", "a", "b"]).is_err());
     }
 
     #[test]
     fn test_new() {
-        let cli = Cli::parse_from(["nb", "new", "my_notebook"]);
+        let cli = Cli::parse_from(["rn", "new", "my_notebook"]);
         let Subcommand::New(args) = cli.subcommand else {
             panic!()
         };
@@ -220,12 +220,12 @@ mod tests {
 
     #[test]
     fn test_open_multiple_names() {
-        assert!(Cli::try_parse_from(["nb", "open", "a", "b"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "open", "a", "b"]).is_err());
     }
 
     #[test]
     fn test_open() {
-        let cli = Cli::parse_from(["nb", "open", "my_notebook"]);
+        let cli = Cli::parse_from(["rn", "open", "my_notebook"]);
         let Subcommand::Open(args) = cli.subcommand else {
             panic!()
         };
@@ -234,14 +234,14 @@ mod tests {
 
     #[test]
     fn test_open_with_editor() {
-        let cli = Cli::parse_from(["nb", "open", "my_notebook", "-e", "nvim"]);
+        let cli = Cli::parse_from(["rn", "open", "my_notebook", "-e", "nvim"]);
         let Subcommand::Open(args) = cli.subcommand else {
             panic!()
         };
         assert_eq!(args.name, "my_notebook");
         assert_eq!(args.editor.unwrap(), "nvim");
 
-        let cli = Cli::parse_from(["nb", "open", "my_notebook", "--editor", "nvim"]);
+        let cli = Cli::parse_from(["rn", "open", "my_notebook", "--editor", "nvim"]);
         let Subcommand::Open(args) = cli.subcommand else {
             panic!()
         };
@@ -251,17 +251,17 @@ mod tests {
 
     #[test]
     fn test_remove_multiple_names() {
-        assert!(Cli::try_parse_from(["nb", "remove", "a", "b"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "remove", "a", "b"]).is_err());
     }
 
     #[test]
     fn test_remove() {
-        let cli = Cli::parse_from(["nb", "remove", "my_notebook"]);
+        let cli = Cli::parse_from(["rn", "remove", "my_notebook"]);
         let Subcommand::Remove(args) = cli.subcommand else {
             panic!()
         };
         assert_eq!(&args.name, "my_notebook");
-        let cli = Cli::parse_from(["nb", "rm", "my_notebook"]);
+        let cli = Cli::parse_from(["rn", "rm", "my_notebook"]);
         let Subcommand::Remove(args) = cli.subcommand else {
             panic!()
         };
@@ -270,34 +270,34 @@ mod tests {
 
     #[test]
     fn test_list_additional_argument() {
-        assert!(Cli::try_parse_from(["nb", "list", "my_notebook"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "list", "my_notebook"]).is_err());
     }
 
     #[test]
     fn test_list() {
-        let cli = Cli::parse_from(["nb", "list"]);
+        let cli = Cli::parse_from(["rn", "list"]);
         assert!(matches!(cli.subcommand, Subcommand::List));
     }
 
     #[test]
     fn test_completions_no_shell() {
-        assert!(Cli::try_parse_from(["nb", "completions"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "completions"]).is_err());
     }
 
     #[test]
     fn test_completions_no_argument_name() {
-        assert!(Cli::try_parse_from(["nb", "completions", "zsh"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "completions", "zsh"]).is_err());
     }
 
     #[test]
     fn test_completions() {
-        let cli = Cli::parse_from(["nb", "completions", "-s", "zsh"]);
+        let cli = Cli::parse_from(["rn", "completions", "-s", "zsh"]);
         let Subcommand::Completions(args) = cli.subcommand else {
             panic!()
         };
         assert_eq!(args.shell, Shell::Zsh);
 
-        let cli = Cli::parse_from(["nb", "completions", "--shell", "zsh"]);
+        let cli = Cli::parse_from(["rn", "completions", "--shell", "zsh"]);
         let Subcommand::Completions(args) = cli.subcommand else {
             panic!()
         };
@@ -306,15 +306,15 @@ mod tests {
 
     #[test]
     fn test_config_wrong_subcommand() {
-        assert!(Cli::try_parse_from(["nb", "config"]).is_err());
-        assert!(Cli::try_parse_from(["nb", "config", "test"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "config"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "config", "test"]).is_err());
     }
 
     #[test]
     fn test_config_generate() {
-        assert!(Cli::try_parse_from(["nb", "config", "generate", "--test"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "config", "generate", "--test"]).is_err());
 
-        let cli = Cli::parse_from(["nb", "config", "generate"]);
+        let cli = Cli::parse_from(["rn", "config", "generate"]);
         let Subcommand::Config(config_args) = cli.subcommand else {
             panic!()
         };
@@ -323,7 +323,7 @@ mod tests {
         };
         assert!(!generate_args.force);
 
-        let cli = Cli::parse_from(["nb", "config", "generate", "--force"]);
+        let cli = Cli::parse_from(["rn", "config", "generate", "--force"]);
         let Subcommand::Config(config_args) = cli.subcommand else {
             panic!()
         };
@@ -332,7 +332,7 @@ mod tests {
         };
         assert!(generate_args.force);
 
-        let cli = Cli::parse_from(["nb", "config", "generate", "-f"]);
+        let cli = Cli::parse_from(["rn", "config", "generate", "-f"]);
         let Subcommand::Config(config_args) = cli.subcommand else {
             panic!()
         };
@@ -344,9 +344,9 @@ mod tests {
 
     #[test]
     fn test_config_get() {
-        assert!(Cli::try_parse_from(["nb", "config", "get"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "config", "get"]).is_err());
 
-        let cli = Cli::parse_from(["nb", "config", "get", "value_name"]);
+        let cli = Cli::parse_from(["rn", "config", "get", "value_name"]);
         let Subcommand::Config(config_args) = cli.subcommand else {
             panic!()
         };
@@ -355,7 +355,7 @@ mod tests {
         };
         assert_eq!(get_args.value_names, ["value_name"]);
 
-        let cli = Cli::parse_from(["nb", "config", "get", "value_name_1", "value_name_2"]);
+        let cli = Cli::parse_from(["rn", "config", "get", "value_name_1", "value_name_2"]);
         let Subcommand::Config(config_args) = cli.subcommand else {
             panic!()
         };
@@ -367,9 +367,9 @@ mod tests {
 
     #[test]
     fn test_config_list() {
-        assert!(Cli::try_parse_from(["nb", "config", "list", "test"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "config", "list", "test"]).is_err());
 
-        let cli = Cli::parse_from(["nb", "config", "list"]);
+        let cli = Cli::parse_from(["rn", "config", "list"]);
         let Subcommand::Config(config_args) = cli.subcommand else {
             panic!()
         };
@@ -378,21 +378,21 @@ mod tests {
 
     #[test]
     fn test_archive_no_subcommand() {
-        assert!(Cli::try_parse_from(["nb", "archive"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive"]).is_err());
     }
 
     #[test]
     fn test_archive_wrong_subcommand() {
-        assert!(Cli::try_parse_from(["nb", "archive", "test"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "test"]).is_err());
     }
 
     #[test]
     fn test_archive_save() {
-        assert!(Cli::try_parse_from(["nb", "archive", "save"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "save"]).is_err());
 
-        assert!(Cli::try_parse_from(["nb", "archive", "save", "nb_1", "nb_2"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "save", "nb_1", "nb_2"]).is_err());
 
-        let cli = Cli::parse_from(["nb", "archive", "save", "nb_1"]);
+        let cli = Cli::parse_from(["rn", "archive", "save", "nb_1"]);
         let Subcommand::Archive(archive_args) = cli.subcommand else {
             panic!();
         };
@@ -404,9 +404,9 @@ mod tests {
 
     #[test]
     fn test_archive_list() {
-        assert!(Cli::try_parse_from(["nb", "archive", "list", "test"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "list", "test"]).is_err());
 
-        let cli = Cli::parse_from(["nb", "archive", "list"]);
+        let cli = Cli::parse_from(["rn", "archive", "list"]);
         let Subcommand::Archive(archive_args) = cli.subcommand else {
             panic!();
         };
@@ -415,11 +415,11 @@ mod tests {
 
     #[test]
     fn test_archive_open() {
-        assert!(Cli::try_parse_from(["nb", "archive", "open"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "open"]).is_err());
 
-        assert!(Cli::try_parse_from(["nb", "archive", "open", "nb_1", "nb_2"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "open", "nb_1", "nb_2"]).is_err());
 
-        let cli = Cli::parse_from(["nb", "archive", "open", "nb_1"]);
+        let cli = Cli::parse_from(["rn", "archive", "open", "nb_1"]);
         let Subcommand::Archive(archive_args) = cli.subcommand else {
             panic!();
         };
@@ -428,7 +428,7 @@ mod tests {
         };
         assert_eq!(open_args.name, "nb_1");
 
-        let cli = Cli::parse_from(["nb", "archive", "open", "-e", "nvim", "nb_1"]);
+        let cli = Cli::parse_from(["rn", "archive", "open", "-e", "nvim", "nb_1"]);
         let Subcommand::Archive(archive_args) = cli.subcommand else {
             panic!();
         };
@@ -441,11 +441,11 @@ mod tests {
 
     #[test]
     fn test_archive_restore() {
-        assert!(Cli::try_parse_from(["nb", "archive", "restore"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "restore"]).is_err());
 
-        assert!(Cli::try_parse_from(["nb", "archive", "restore", "nb_1", "nb_2"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "restore", "nb_1", "nb_2"]).is_err());
 
-        let cli = Cli::parse_from(["nb", "archive", "restore", "nb_1"]);
+        let cli = Cli::parse_from(["rn", "archive", "restore", "nb_1"]);
         let Subcommand::Archive(archive_args) = cli.subcommand else {
             panic!();
         };
@@ -455,7 +455,7 @@ mod tests {
         assert_eq!(restore_args.archive_name, "nb_1");
         assert_eq!(restore_args.new_name, None);
 
-        let cli = Cli::parse_from(["nb", "archive", "restore", "nb_1", "--new-name", "nb"]);
+        let cli = Cli::parse_from(["rn", "archive", "restore", "nb_1", "--new-name", "nb"]);
         let Subcommand::Archive(archive_args) = cli.subcommand else {
             panic!();
         };
@@ -468,11 +468,11 @@ mod tests {
 
     #[test]
     fn test_archive_remove() {
-        assert!(Cli::try_parse_from(["nb", "archive", "remove"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "remove"]).is_err());
 
-        assert!(Cli::try_parse_from(["nb", "archive", "remove", "nb_1", "nb_2"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "archive", "remove", "nb_1", "nb_2"]).is_err());
 
-        let cli = Cli::parse_from(["nb", "archive", "remove", "nb_1"]);
+        let cli = Cli::parse_from(["rn", "archive", "remove", "nb_1"]);
         let Subcommand::Archive(archive_args) = cli.subcommand else {
             panic!();
         };

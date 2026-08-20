@@ -1,10 +1,10 @@
-#compdef nb
+#compdef rn
 
-NB_ROOT_DIR="$HOME/.nb"
+RN_ROOT_DIR="$HOME/.rn"
 NOTEBOOK_DIR_NAME="notebooks"
 ARCHIVE_DIR_NAME="archive"
 
-_nb() {
+_rn() {
   typeset -A opt_args
   local context state line
   local curcontext="$curcontext"
@@ -13,7 +13,7 @@ _nb() {
   _arguments -C -A "-*" \
     '(- *)--version[Print version]' \
     '(- *)'{-h,--help}'[Print help]' \
-    '1: :_nb_subcommands' \
+    '1: :_rn_subcommands' \
     '*::arg:->args' \
     && ret=0
 
@@ -53,10 +53,10 @@ _nb() {
             && ret=0
           ;;
         (config)
-          _nb_config && ret=0
+          _rn_config && ret=0
           ;;
         (archive)
-          _nb_archive && ret=0
+          _rn_archive && ret=0
           ;;
       esac
       ;;
@@ -65,8 +65,8 @@ _nb() {
   return ret
 }
 
-(( $+functions[_nb_subcommands] )) ||
-  _nb_subcommands() {
+(( $+functions[_rn_subcommands] )) ||
+  _rn_subcommands() {
     local -a commands=(
       "new:Create a new notebook"
       "open:Open a notebook"
@@ -76,11 +76,11 @@ _nb() {
       "completions:Completion script for specific shell"
       "archive:View and manage archive"
     )
-    _describe -t commands 'nb commands' commands "$@"
+    _describe -t commands 'rn commands' commands "$@"
   }
 
-(( $+functions[_nb_config_subcommands] )) ||
-  _nb_config_subcommands() {
+(( $+functions[_rn_config_subcommands] )) ||
+  _rn_config_subcommands() {
     local -a commands=(
       "generate:Generate a default config file"
       "get:Get specific config values"
@@ -89,11 +89,11 @@ _nb() {
     _describe -t commands 'command' commands "$@"
   }
 
-(( $+functions[_nb_config] )) ||
-  _nb_config() {
+(( $+functions[_rn_config] )) ||
+  _rn_config() {
     local ret=1
     _arguments -C \
-      '1: :_nb_config_subcommands' \
+      '1: :_rn_config_subcommands' \
       '*:: :->arg' \
       && ret=0
     case $state in
@@ -118,8 +118,8 @@ _nb() {
     return $ret
   }
 
-(( $+functions[_nb_archive_subcommands] )) ||
-  _nb_archive_subcommands() {
+(( $+functions[_rn_archive_subcommands] )) ||
+  _rn_archive_subcommands() {
     local -a commands=(
       "save:Archive a specific notebook"
       "list:List all archived notebooks"
@@ -130,11 +130,11 @@ _nb() {
     _describe -t commands 'command' commands "$@"
   }
 
-(( $+functions[_nb_archive] )) ||
-  _nb_archive() {
+(( $+functions[_rn_archive] )) ||
+  _rn_archive() {
     local ret=1
     _arguments -C \
-      '1: :_nb_archive_subcommands' \
+      '1: :_rn_archive_subcommands' \
       '*:: :->arg' \
       && ret=0
     case $state in
@@ -173,10 +173,10 @@ _nb() {
 
 (( $+functions[_notebooks] )) ||
   _notebooks() {
-    [[ -d "$NB_ROOT_DIR/$NOTEBOOK_DIR_NAME" ]] || return 1
+    [[ -d "$RN_ROOT_DIR/$NOTEBOOK_DIR_NAME" ]] || return 1
 
     local -a file_paths
-    file_paths=("$NB_ROOT_DIR/$NOTEBOOK_DIR_NAME"/*(N))
+    file_paths=("$RN_ROOT_DIR/$NOTEBOOK_DIR_NAME"/*(N))
 
     local -a file_names
     file_names=(${file_paths:t})
@@ -185,15 +185,15 @@ _nb() {
 
 (( $+functions[_archived_notebooks] )) ||
   _archived_notebooks() {
-    [[ -d "$NB_ROOT_DIR/$ARCHIVE_DIR_NAME" ]] || return 1
+    [[ -d "$RN_ROOT_DIR/$ARCHIVE_DIR_NAME" ]] || return 1
 
     local -a file_paths
-    file_paths=("$NB_ROOT_DIR/$ARCHIVE_DIR_NAME"/*(N))
+    file_paths=("$RN_ROOT_DIR/$ARCHIVE_DIR_NAME"/*(N))
 
     local -a file_names
     file_names=(${file_paths:t})
     _wanted archived expl 'archived' compadd -Q -- $file_names
   }
 
-_nb
+_rn
 # vim: ft=zsh sw=2 ts=2 et

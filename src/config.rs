@@ -22,8 +22,8 @@ fn config_dir() -> Result<PathBuf> {
 
 pub fn config_file() -> Result<PathBuf> {
     let mut path = config_dir()?;
-    path.push("nb");
-    path.push("nb.toml");
+    path.push("rn");
+    path.push("rn.toml");
     Ok(path)
 }
 
