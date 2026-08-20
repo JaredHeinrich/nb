@@ -3,6 +3,7 @@ use clap::{Args, Parser, ValueEnum};
 
 #[derive(Parser)]
 #[command(version = "0.1.0")]
+#[command(name = "rn")]
 #[command(about = "CLI notebook manager")]
 #[command(disable_help_subcommand = true)]
 #[command(flatten_help = true)]
