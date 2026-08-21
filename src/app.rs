@@ -134,9 +134,7 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn handle_list(&self) -> Result<Message> {
-        let notes = self
-            .fs
-            .get_files(&self.get_dir_path(NoteType::Active))?;
+        let notes = self.fs.get_files(&self.get_dir_path(NoteType::Active))?;
         Ok(Message::Notebook(notes))
     }
 
@@ -221,9 +219,7 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn handle_archive_list(&self) -> Result<Message> {
-        let archived_notes = self
-            .fs
-            .get_files(&self.get_dir_path(NoteType::Archived))?;
+        let archived_notes = self.fs.get_files(&self.get_dir_path(NoteType::Archived))?;
         Ok(Message::Archive(archived_notes))
     }
 

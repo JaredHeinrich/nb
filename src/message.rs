@@ -22,13 +22,7 @@ impl Display for Message {
             Self::DeletedNote => {
                 writeln!(f, "Deleted note")
             }
-            Self::Notebook(notes) => {
-                for name in notes {
-                    writeln!(f, "{name}")?;
-                }
-                Ok(())
-            }
-            Self::Archive(notes) => {
+            Self::Notebook(notes) | Self::Archive(notes) => {
                 for name in notes {
                     writeln!(f, "{name}")?;
                 }
