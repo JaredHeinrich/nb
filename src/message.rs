@@ -2,28 +2,35 @@ use std::{fmt::Display, path::PathBuf};
 
 #[derive(Debug)]
 pub enum Message {
-    ListOfNoteBooks(Vec<String>),
-    CreatedNoteBook,
-    DeletedNoteBook,
+    Notebook(Vec<String>),
+    Archive(Vec<String>),
+    CreatedNote,
+    DeletedNote,
     CompletionScript(String),
     ConfigValues(Vec<(String, String)>),
     GeneratedConfig(PathBuf),
-    ArchivedNotebook((String, String)),
-    RestoredNotebook((String, String)),
+    ArchivedNote((String, String)),
+    RestoredNote((String, String)),
     Empty,
 }
 impl Display for Message {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CreatedNoteBook => {
-                writeln!(f, "Created notebook")
+            Self::CreatedNote => {
+                writeln!(f, "Created note")
             }
-            Self::DeletedNoteBook => {
-                writeln!(f, "Deleted notebook")
+            Self::DeletedNote => {
+                writeln!(f, "Deleted note")
             }
-            Self::ListOfNoteBooks(file_names) => {
-                for file_name in file_names {
-                    writeln!(f, "{file_name}")?;
+            Self::Notebook(notes) => {
+                for name in notes {
+                    writeln!(f, "{name}")?;
+                }
+                Ok(())
+            }
+            Self::Archive(notes) => {
+                for name in notes {
+                    writeln!(f, "{name}")?;
                 }
                 Ok(())
             }
@@ -40,11 +47,11 @@ impl Display for Message {
                 Ok(())
             }
             Self::GeneratedConfig(path) => writeln!(f, "Generated config file {}", path.display()),
-            Self::ArchivedNotebook((original_name, archived_name)) => {
-                writeln!(f, "Archived notebook {original_name} to {archived_name}")
+            Self::ArchivedNote((original_name, archived_name)) => {
+                writeln!(f, "Archived note {original_name} to {archived_name}")
             }
-            Self::RestoredNotebook((archived_name, new_name)) => {
-                writeln!(f, "Restored notebook {archived_name} to {new_name}")
+            Self::RestoredNote((archived_name, new_name)) => {
+                writeln!(f, "Restored note {archived_name} to {new_name}")
             }
             Self::Empty => Ok(()),
         }

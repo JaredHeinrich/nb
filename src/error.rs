@@ -14,8 +14,8 @@ pub enum AppError {
 impl Display for AppError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::AlreadyExists(name) => writeln!(f, "A notebook named \"{name}\" already exists."),
-            Self::NotFound(name) => writeln!(f, "No notebook named \"{name}\" exists."),
+            Self::AlreadyExists(name) => writeln!(f, "A note named \"{name}\" already exists."),
+            Self::NotFound(name) => writeln!(f, "No note named \"{name}\" exists."),
             Self::ConfigAlreadyExists(path) => {
                 writeln!(f, "A config file already exists {}.", path.display())?;
                 writeln!(f, "To overwrite it with the default use `--force`.")
@@ -23,13 +23,13 @@ impl Display for AppError {
             Self::RestoreAlreadyExists(name) => {
                 writeln!(
                     f,
-                    "Can't restore notebook, because a notebook named \"{name}\" already exists."
+                    "Can't restore note, because a note named \"{name}\" already exists."
                 )?;
                 writeln!(
                     f,
-                    "Use `--new-name` to change the name of the restored notebook."
+                    "Use `--new-name` to change the name of the restored note."
                 )?;
-                writeln!(f, "Or remove/archive the existing notebook.")
+                writeln!(f, "Or remove/archive the existing note.")
             }
             Self::ArchiveAlreadyExists(name) => writeln!(
                 f,

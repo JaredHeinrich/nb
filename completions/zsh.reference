@@ -32,30 +32,30 @@ _rn() {
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to be created:_default' \
+':name -- Name of the note to be created:_default' \
 && ret=0
 ;;
 (open)
 _arguments "${_arguments_options[@]}" : \
-'-e+[Editor command used to open the notebook]:EDITOR:_default' \
-'--editor=[Editor command used to open the notebook]:EDITOR:_default' \
+'-e+[Editor command used to open the note]:EDITOR:_default' \
+'--editor=[Editor command used to open the note]:EDITOR:_default' \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to open:_default' \
+':name -- Name of the note to open:_default' \
 && ret=0
 ;;
 (remove)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to be deleted:_default' \
+':name -- Name of the note to be deleted:_default' \
 && ret=0
 ;;
 (rm)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to be deleted:_default' \
+':name -- Name of the note to be deleted:_default' \
 && ret=0
 ;;
 (list)
@@ -141,7 +141,7 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to archive:_default' \
+':name -- Name of the note to archive:_default' \
 && ret=0
 ;;
 (list)
@@ -158,34 +158,34 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (open)
 _arguments "${_arguments_options[@]}" : \
-'-e+[Editor command used to open the notebook]:EDITOR:_default' \
-'--editor=[Editor command used to open the notebook]:EDITOR:_default' \
+'-e+[Editor command used to open the note]:EDITOR:_default' \
+'--editor=[Editor command used to open the note]:EDITOR:_default' \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to open:_default' \
+':name -- Name of the note to open:_default' \
 && ret=0
 ;;
 (restore)
 _arguments "${_arguments_options[@]}" : \
-'-n+[New name of the notebook after its restored]:NEW_NAME:_default' \
-'--new-name=[New name of the notebook after its restored]:NEW_NAME:_default' \
+'-n+[New name of the note after its restored]:NEW_NAME:_default' \
+'--new-name=[New name of the note after its restored]:NEW_NAME:_default' \
 '-h[Print help]' \
 '--help[Print help]' \
-':archive_name -- Name of the notebook to restore from archive:_default' \
+':archive_name -- Name of the note to restore from archive:_default' \
 && ret=0
 ;;
 (remove)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to delete from archive:_default' \
+':name -- Name of the note to delete from archive:_default' \
 && ret=0
 ;;
 (rm)
 _arguments "${_arguments_options[@]}" : \
 '-h[Print help]' \
 '--help[Print help]' \
-':name -- Name of the notebook to delete from archive:_default' \
+':name -- Name of the note to delete from archive:_default' \
 && ret=0
 ;;
         esac
@@ -200,12 +200,12 @@ esac
 (( $+functions[_rn_commands] )) ||
 _rn_commands() {
     local commands; commands=(
-'new:Create a new notebook' \
-'open:Open a notebook' \
-'remove:Delete a notebook' \
-'rm:Delete a notebook' \
-'list:List existing notebooks' \
-'ls:List existing notebooks' \
+'new:Create a new note' \
+'open:Open a note' \
+'remove:Delete a note' \
+'rm:Delete a note' \
+'list:List existing notes' \
+'ls:List existing notes' \
 'config:Access config via cli' \
 'completions:Completion script for specific shell' \
 'archive:View and manage archive' \
@@ -215,13 +215,13 @@ _rn_commands() {
 (( $+functions[_rn__archive_commands] )) ||
 _rn__archive_commands() {
     local commands; commands=(
-'save:Archive a specific notebook' \
-'list:List all archived notebooks' \
-'ls:List all archived notebooks' \
-'open:Open a archived notebook' \
-'restore:Restore a notebook from the archive' \
-'remove:Delete a archived notebook permanently' \
-'rm:Delete a archived notebook permanently' \
+'save:Archive a specific note' \
+'list:List all archived notes' \
+'ls:List all archived notes' \
+'open:Open a archived note' \
+'restore:Restore a note from the archive' \
+'remove:Delete a archived note permanently' \
+'rm:Delete a archived note permanently' \
     )
     _describe -t commands 'rn archive commands' commands "$@"
 }

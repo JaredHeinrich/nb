@@ -22,17 +22,17 @@ fn extract_file_name(root_dir_path: &Path, file_path: &Path) -> Result<String> {
 #[allow(unused)]
 pub struct MockFileSystem {
     opened_files: Vec<PathBuf>,
-    notebook_root_dir: PathBuf,
+    rn_root_dir: PathBuf,
     files: Vec<String>,
 }
 
 #[allow(unused)]
 impl MockFileSystem {
-    pub fn new(notebook_root_dir: PathBuf, notebooks: Vec<String>) -> Self {
+    pub fn new(rn_root_dir: PathBuf, notes: Vec<String>) -> Self {
         Self {
             opened_files: Vec::new(),
-            notebook_root_dir,
-            files: notebooks,
+            rn_root_dir,
+            files: notes,
         }
     }
 
@@ -41,7 +41,7 @@ impl MockFileSystem {
     }
 
     fn is_file(&self, path: &Path) -> bool {
-        if let Ok(file_name) = extract_file_name(&self.notebook_root_dir, path) {
+        if let Ok(file_name) = extract_file_name(&self.rn_root_dir, path) {
             if self.files.contains(&file_name) {
                 return true;
             }
@@ -50,7 +50,7 @@ impl MockFileSystem {
     }
 
     fn is_dir(&self, path: &Path) -> bool {
-        if *path == self.notebook_root_dir {
+        if *path == self.rn_root_dir {
             return true;
         }
         false
@@ -59,14 +59,14 @@ impl MockFileSystem {
 
 impl FileOperations for MockFileSystem {
     fn get_files(&self, dir: &Path) -> Result<Vec<String>> {
-        if *dir == self.notebook_root_dir {
+        if *dir == self.rn_root_dir {
             return Ok(self.files.clone());
         }
         Err(anyhow!("Directory does not exist"))
     }
 
     fn delete_file(&mut self, path: &Path) -> Result<()> {
-        let file_name = extract_file_name(&self.notebook_root_dir, path)?;
+        let file_name = extract_file_name(&self.rn_root_dir, path)?;
         let file_index = self.files.iter().position(|f| *f == file_name);
         if let Some(file_index) = file_index {
             let _ = self.files.remove(file_index);
@@ -76,14 +76,14 @@ impl FileOperations for MockFileSystem {
     }
 
     fn create_file(&mut self, path: &Path) -> Result<()> {
-        extract_file_name(&self.notebook_root_dir, path).map(|file_name| {
+        extract_file_name(&self.rn_root_dir, path).map(|file_name| {
             self.files.push(file_name);
         })
     }
 
     fn create_dir(&mut self, path: &Path) -> Result<()> {
-        if *path == self.notebook_root_dir {
-            return Err(anyhow!("{:?} already exists", self.notebook_root_dir));
+        if *path == self.rn_root_dir {
+            return Err(anyhow!("{:?} already exists", self.rn_root_dir));
         }
         Err(anyhow!("can't create directories in mock fs"))
     }
