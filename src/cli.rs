@@ -4,7 +4,7 @@ use clap::{Args, Parser, ValueEnum};
 #[derive(Parser)]
 #[command(version = "0.1.0")]
 #[command(name = "rn")]
-#[command(about = "CLI notebook manager")]
+#[command(about = "CLI notes manager")]
 #[command(disable_help_subcommand = true)]
 #[command(flatten_help = true)]
 pub struct Cli {
@@ -14,17 +14,17 @@ pub struct Cli {
 
 #[derive(ClapSubcommand)]
 pub enum Subcommand {
-    #[command(about = "Create a new notebook")]
+    #[command(about = "Create a new note")]
     New(NewArgs),
 
-    #[command(about = "Open a notebook")]
+    #[command(about = "Open a note")]
     Open(OpenArgs),
 
-    #[command(about = "Delete a notebook")]
+    #[command(about = "Delete a note")]
     #[clap(visible_alias = "rm")]
     Remove(RemoveArgs),
 
-    #[command(about = "List existing notebooks")]
+    #[command(about = "List existing notes")]
     #[clap(visible_alias = "ls")]
     List,
 
@@ -40,24 +40,24 @@ pub enum Subcommand {
 
 #[derive(Args)]
 pub struct NewArgs {
-    #[arg(help = "Name of the notebook to be created")]
+    #[arg(help = "Name of the note to be created")]
     #[arg(value_parser=non_empty_trimmed)]
     pub name: String,
 }
 
 #[derive(Args)]
 pub struct OpenArgs {
-    #[arg(help = "Name of the notebook to open")]
+    #[arg(help = "Name of the note to open")]
     pub name: String,
 
-    #[arg(help = "Editor command used to open the notebook")]
+    #[arg(help = "Editor command used to open the note")]
     #[arg(short, long)]
     pub editor: Option<String>,
 }
 
 #[derive(Args)]
 pub struct RemoveArgs {
-    #[arg(help = "Name of the notebook to be deleted")]
+    #[arg(help = "Name of the note to be deleted")]
     pub name: String,
 }
 
@@ -115,53 +115,53 @@ pub struct ArchiveArgs {
 
 #[derive(ClapSubcommand)]
 pub enum ArchiveSubcommand {
-    #[command(about = "Archive a specific notebook")]
+    #[command(about = "Archive a specific note")]
     Save(ArchiveSaveArgs),
 
-    #[command(about = "List all archived notebooks")]
+    #[command(about = "List all archived notes")]
     #[clap(visible_alias = "ls")]
     List,
 
-    #[command(about = "Open a archived notebook")]
+    #[command(about = "Open a archived note")]
     Open(ArchiveOpenArgs),
 
-    #[command(about = "Restore a notebook from the archive")]
+    #[command(about = "Restore a note from the archive")]
     Restore(ArchiveRestoreArgs),
 
-    #[command(about = "Delete a archived notebook permanently")]
+    #[command(about = "Delete a archived note permanently")]
     #[clap(visible_alias = "rm")]
     Remove(ArchiveRemoveArgs),
 }
 
 #[derive(Args)]
 pub struct ArchiveSaveArgs {
-    #[arg(help = "Name of the notebook to archive")]
+    #[arg(help = "Name of the note to archive")]
     pub name: String,
 }
 
 #[derive(Args)]
 pub struct ArchiveOpenArgs {
-    #[arg(help = "Name of the notebook to open")]
+    #[arg(help = "Name of the note to open")]
     pub name: String,
 
-    #[arg(help = "Editor command used to open the notebook")]
+    #[arg(help = "Editor command used to open the note")]
     #[arg(short, long)]
     pub editor: Option<String>,
 }
 
 #[derive(Args)]
 pub struct ArchiveRestoreArgs {
-    #[arg(help = "Name of the notebook to restore from archive")]
+    #[arg(help = "Name of the note to restore from archive")]
     pub archive_name: String,
 
-    #[arg(help = "New name of the notebook after its restored")]
+    #[arg(help = "New name of the note after its restored")]
     #[arg(short, long)]
     pub new_name: Option<String>,
 }
 
 #[derive(Args)]
 pub struct ArchiveRemoveArgs {
-    #[arg(help = "Name of the notebook to delete from archive")]
+    #[arg(help = "Name of the note to delete from archive")]
     pub name: String,
 }
 
@@ -212,11 +212,11 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let cli = Cli::parse_from(["rn", "new", "my_notebook"]);
+        let cli = Cli::parse_from(["rn", "new", "my_note"]);
         let Subcommand::New(args) = cli.subcommand else {
             panic!()
         };
-        assert_eq!(args.name, "my_notebook");
+        assert_eq!(args.name, "my_note");
     }
 
     #[test]
@@ -226,27 +226,27 @@ mod tests {
 
     #[test]
     fn test_open() {
-        let cli = Cli::parse_from(["rn", "open", "my_notebook"]);
+        let cli = Cli::parse_from(["rn", "open", "my_note"]);
         let Subcommand::Open(args) = cli.subcommand else {
             panic!()
         };
-        assert_eq!(args.name, "my_notebook");
+        assert_eq!(args.name, "my_note");
     }
 
     #[test]
     fn test_open_with_editor() {
-        let cli = Cli::parse_from(["rn", "open", "my_notebook", "-e", "nvim"]);
+        let cli = Cli::parse_from(["rn", "open", "my_note", "-e", "nvim"]);
         let Subcommand::Open(args) = cli.subcommand else {
             panic!()
         };
-        assert_eq!(args.name, "my_notebook");
+        assert_eq!(args.name, "my_note");
         assert_eq!(args.editor.unwrap(), "nvim");
 
-        let cli = Cli::parse_from(["rn", "open", "my_notebook", "--editor", "nvim"]);
+        let cli = Cli::parse_from(["rn", "open", "my_note", "--editor", "nvim"]);
         let Subcommand::Open(args) = cli.subcommand else {
             panic!()
         };
-        assert_eq!(args.name, "my_notebook");
+        assert_eq!(args.name, "my_note");
         assert_eq!(args.editor.unwrap(), "nvim");
     }
 
@@ -257,21 +257,21 @@ mod tests {
 
     #[test]
     fn test_remove() {
-        let cli = Cli::parse_from(["rn", "remove", "my_notebook"]);
+        let cli = Cli::parse_from(["rn", "remove", "my_note"]);
         let Subcommand::Remove(args) = cli.subcommand else {
             panic!()
         };
-        assert_eq!(&args.name, "my_notebook");
-        let cli = Cli::parse_from(["rn", "rm", "my_notebook"]);
+        assert_eq!(&args.name, "my_note");
+        let cli = Cli::parse_from(["rn", "rm", "my_note"]);
         let Subcommand::Remove(args) = cli.subcommand else {
             panic!()
         };
-        assert_eq!(&args.name, "my_notebook");
+        assert_eq!(&args.name, "my_note");
     }
 
     #[test]
     fn test_list_additional_argument() {
-        assert!(Cli::try_parse_from(["rn", "list", "my_notebook"]).is_err());
+        assert!(Cli::try_parse_from(["rn", "list", "my_note"]).is_err());
     }
 
     #[test]

@@ -12,11 +12,11 @@ use crate::file_operations::FileOperations;
 use crate::message::Message;
 
 const RN_ROOT_DIR: &str = ".rn";
-const NOTEBOOK_DIR_NAME: &str = "notebooks";
+const NOTEBOOK_DIR_NAME: &str = "notebook";
 const ARCHIVE_DIR_NAME: &str = "archive";
 
 #[derive(Clone, Copy)]
-enum NotebookType {
+enum NoteType {
     Active,
     Archived,
 }
@@ -47,20 +47,20 @@ impl<FS: FileOperations> App<FS> {
     }
 
     fn archive_dir(&self) -> PathBuf {
-        let mut notebook_dir = self.rn_root_dir.clone();
-        notebook_dir.push(ARCHIVE_DIR_NAME);
-        notebook_dir
+        let mut archive_dir = self.rn_root_dir.clone();
+        archive_dir.push(ARCHIVE_DIR_NAME);
+        archive_dir
     }
 
-    fn get_dir_path(&self, nb_type: NotebookType) -> PathBuf {
-        match nb_type {
-            NotebookType::Active => self.notebook_dir(),
-            NotebookType::Archived => self.archive_dir(),
+    fn get_dir_path(&self, note_type: NoteType) -> PathBuf {
+        match note_type {
+            NoteType::Active => self.notebook_dir(),
+            NoteType::Archived => self.archive_dir(),
         }
     }
 
-    fn get_nb_path(&self, name: &str, nb_type: NotebookType) -> PathBuf {
-        let mut path = self.get_dir_path(nb_type);
+    fn get_note_path(&self, name: &str, note_type: NoteType) -> PathBuf {
+        let mut path = self.get_dir_path(note_type);
         path.push(name);
         path
     }
@@ -70,19 +70,19 @@ impl<FS: FileOperations> App<FS> {
         if !self.fs.exists(rn_root_dir)? {
             self.fs.create_dir(rn_root_dir)?;
         }
-        let active_dir = self.get_dir_path(NotebookType::Active);
+        let active_dir = self.get_dir_path(NoteType::Active);
         if !self.fs.exists(&active_dir)? {
             self.fs.create_dir(&active_dir)?;
         }
-        let archive_dir = self.get_dir_path(NotebookType::Archived);
+        let archive_dir = self.get_dir_path(NoteType::Archived);
         if !self.fs.exists(&archive_dir)? {
             self.fs.create_dir(&archive_dir)?;
         }
         Ok(())
     }
 
-    fn open_notebook(&mut self, name: String, nb_type: NotebookType) -> Result<Message> {
-        let path = self.get_nb_path(name.as_str(), nb_type);
+    fn open_note(&mut self, name: String, note_type: NoteType) -> Result<Message> {
+        let path = self.get_note_path(name.as_str(), note_type);
         if !self.fs.exists(&path)? {
             return Err(AppError::NotFound(name).into());
         }
@@ -114,37 +114,37 @@ impl<FS: FileOperations> App<FS> {
     #[allow(clippy::needless_pass_by_value)]
     fn handle_new(&mut self, args: cli::NewArgs) -> Result<Message> {
         let name = args.name;
-        let path = self.get_nb_path(&name, NotebookType::Active);
+        let path = self.get_note_path(&name, NoteType::Active);
         if self.fs.exists(&path)? {
             return Err(AppError::AlreadyExists(name).into());
         }
         self.fs.create_file(&path)?;
-        Ok(Message::CreatedNoteBook)
+        Ok(Message::CreatedNote)
     }
 
     #[allow(clippy::needless_pass_by_value)]
     fn handle_remove(&mut self, args: cli::RemoveArgs) -> Result<Message> {
         let name = args.name;
-        let path = self.get_nb_path(&name, NotebookType::Active);
+        let path = self.get_note_path(&name, NoteType::Active);
         if !self.fs.exists(&path)? {
             return Err(AppError::NotFound(name).into());
         }
         self.fs.delete_file(&path)?;
-        Ok(Message::DeletedNoteBook)
+        Ok(Message::DeletedNote)
     }
 
     fn handle_list(&self) -> Result<Message> {
-        let files = self
+        let notes = self
             .fs
-            .get_files(&self.get_dir_path(NotebookType::Active))?;
-        Ok(Message::ListOfNoteBooks(files))
+            .get_files(&self.get_dir_path(NoteType::Active))?;
+        Ok(Message::Notebook(notes))
     }
 
     fn handle_open(&mut self, args: cli::OpenArgs) -> Result<Message> {
         if let Some(editor) = args.editor {
             self.config.editor = editor;
         }
-        self.open_notebook(args.name, NotebookType::Active)
+        self.open_note(args.name, NoteType::Active)
     }
 
     #[allow(clippy::unused_self)]
@@ -205,33 +205,33 @@ impl<FS: FileOperations> App<FS> {
 
     fn handle_archive_save(&mut self, args: cli::ArchiveSaveArgs) -> Result<Message> {
         let name = args.name;
-        let active_path = self.get_nb_path(name.as_str(), NotebookType::Active);
+        let active_path = self.get_note_path(name.as_str(), NoteType::Active);
         if !self.fs.exists(&active_path)? {
             return Err(AppError::NotFound(name).into());
         }
         let time_stamp = Local::now().format("%d-%m-%Y-%H:%M:%S").to_string();
         let archived_name = format!("{name}_{time_stamp}");
-        let archived_path = self.get_nb_path(&archived_name, NotebookType::Archived);
+        let archived_path = self.get_note_path(&archived_name, NoteType::Archived);
         if self.fs.exists(&archived_path)? {
             return Err(AppError::ArchiveAlreadyExists(archived_name).into());
         }
         self.fs.copy(&active_path, &archived_path)?;
         self.fs.delete_file(&active_path)?;
-        Ok(Message::ArchivedNotebook((name, archived_name)))
+        Ok(Message::ArchivedNote((name, archived_name)))
     }
 
     fn handle_archive_list(&self) -> Result<Message> {
-        let files = self
+        let archived_notes = self
             .fs
-            .get_files(&self.get_dir_path(NotebookType::Archived))?;
-        Ok(Message::ListOfNoteBooks(files))
+            .get_files(&self.get_dir_path(NoteType::Archived))?;
+        Ok(Message::Archive(archived_notes))
     }
 
     fn handle_archive_open(&mut self, args: cli::ArchiveOpenArgs) -> Result<Message> {
         if let Some(editor) = args.editor {
             self.config.editor = editor;
         }
-        self.open_notebook(args.name, NotebookType::Archived)
+        self.open_note(args.name, NoteType::Archived)
     }
 
     fn handle_archive_restore(&mut self, args: cli::ArchiveRestoreArgs) -> Result<Message> {
@@ -242,23 +242,23 @@ impl<FS: FileOperations> App<FS> {
             }
             .to_owned()
         });
-        let path = self.get_nb_path(new_name.as_str(), NotebookType::Active);
+        let path = self.get_note_path(new_name.as_str(), NoteType::Active);
         if self.fs.exists(&path)? {
             return Err(AppError::RestoreAlreadyExists(new_name).into());
         }
-        let archived_path = self.get_nb_path(args.archive_name.as_str(), NotebookType::Archived);
+        let archived_path = self.get_note_path(args.archive_name.as_str(), NoteType::Archived);
         self.fs.copy(&archived_path, &path)?;
-        Ok(Message::RestoredNotebook((args.archive_name, new_name)))
+        Ok(Message::RestoredNote((args.archive_name, new_name)))
     }
 
     fn handle_archive_remove(&mut self, args: cli::ArchiveRemoveArgs) -> Result<Message> {
         let name = args.name;
-        let path = self.get_nb_path(name.as_str(), NotebookType::Archived);
+        let path = self.get_note_path(name.as_str(), NoteType::Archived);
         if !self.fs.exists(&path)? {
             return Err(AppError::NotFound(name).into());
         }
         self.fs.delete_file(&path)?;
-        Ok(Message::DeletedNoteBook)
+        Ok(Message::DeletedNote)
     }
 
     pub fn handle_command(&mut self, command: cli::Cli) -> Result<Message> {

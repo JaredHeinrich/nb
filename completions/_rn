@@ -1,7 +1,7 @@
 #compdef rn
 
 RN_ROOT_DIR="$HOME/.rn"
-NOTEBOOK_DIR_NAME="notebooks"
+NOTEBOOK_DIR_NAME="notebook"
 ARCHIVE_DIR_NAME="archive"
 
 _rn() {
@@ -22,23 +22,23 @@ _rn() {
       case $words[1] in
         (new)
           _arguments \
-            ':name -- Name of the notebook to be created:' \
+            ':name -- Name of the note to be created:' \
             && ret=0
           ;;
         (open)
           _arguments \
-            '::name -- Name of the notebook to open:_notebooks' \
-            '--editor+[Editor command used to open the notebook]:EDITOR:' \
+            '::name -- Name of the note to open:_notebook' \
+            '--editor+[Editor command used to open the note]:EDITOR:' \
             && ret=0
           ;;
         (remove)
           _arguments \
-            ':name -- Name of the notebook to be deleted:_notebooks' \
+            ':name -- Name of the note to be deleted:_notebook' \
             && ret=0
           ;;
         (rm)
           _arguments \
-            ':name -- Name of the notebook to be deleted:_notebooks' \
+            ':name -- Name of the note to be deleted:_notebook' \
             && ret=0
           ;;
         (list)
@@ -68,10 +68,10 @@ _rn() {
 (( $+functions[_rn_subcommands] )) ||
   _rn_subcommands() {
     local -a commands=(
-      "new:Create a new notebook"
-      "open:Open a notebook"
-      "remove:Delete a notebook"
-      "list:List existing notebooks"
+      "new:Create a new note"
+      "open:Open a note"
+      "remove:Delete a note"
+      "list:List existing notes"
       "config:Access config via cli"
       "completions:Completion script for specific shell"
       "archive:View and manage archive"
@@ -121,11 +121,11 @@ _rn() {
 (( $+functions[_rn_archive_subcommands] )) ||
   _rn_archive_subcommands() {
     local -a commands=(
-      "save:Archive a specific notebook"
-      "list:List all archived notebooks"
-      "open:Open a archived notebook"
-      "restore:Restore a notebook from the archive"
-      "remove:Delete a archived notebook permanently"
+      "save:Archive a specific note"
+      "list:List all archived notes"
+      "open:Open a archived note"
+      "restore:Restore a note from the archive"
+      "remove:Delete a archived note permanently"
     )
     _describe -t commands 'command' commands "$@"
   }
@@ -142,7 +142,7 @@ _rn() {
         case $words[1] in
           (save)
             _arguments \
-              ':name -- Name of the notebook to archive:_notebooks' \
+              ':name -- Name of the note to archive:_notebook' \
               && ret=0
             ;;
           (list)
@@ -150,19 +150,19 @@ _rn() {
             ;;
           (open)
             _arguments \
-              ':name -- Name of the notebook to open:_archived_notebooks' \
-              '--editor+[Editor command used to open the notebook]:EDITOR:' \
+              ':name -- Name of the note to open:_archive' \
+              '--editor+[Editor command used to open the note]:EDITOR:' \
               && ret=0
             ;;
           (restore)
             _arguments \
-              ':archive_name -- Name of the notebook to restore from archive:_archived_notebooks' \
-              '--new-name+[New name of the notebook after its restored]:NEW_NAME:' \
+              ':archive_name -- Name of the note to restore from archive:_archive' \
+              '--new-name+[New name of the note after its restored]:NEW_NAME:' \
               && ret=0
             ;;
           (remove)
             _arguments \
-              ':name -- Name of the notebook to delete from archive:_archived_notebooks' \
+              ':name -- Name of the note to delete from archive:_archive' \
               && ret=0
             ;;
         esac
@@ -171,8 +171,8 @@ _rn() {
     return $ret
   }
 
-(( $+functions[_notebooks] )) ||
-  _notebooks() {
+(( $+functions[_notebook] )) ||
+  _notebook() {
     [[ -d "$RN_ROOT_DIR/$NOTEBOOK_DIR_NAME" ]] || return 1
 
     local -a file_paths
@@ -180,11 +180,11 @@ _rn() {
 
     local -a file_names
     file_names=(${file_paths:t})
-    _wanted notebooks expl 'notebook' compadd -Q -- $file_names
+    _wanted note expl 'note' compadd -Q -- $file_names
   }
 
-(( $+functions[_archived_notebooks] )) ||
-  _archived_notebooks() {
+(( $+functions[_archive] )) ||
+  _archive() {
     [[ -d "$RN_ROOT_DIR/$ARCHIVE_DIR_NAME" ]] || return 1
 
     local -a file_paths
